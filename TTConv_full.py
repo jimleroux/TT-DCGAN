@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class TTConv(torch.nn.Module):
+class TTConv_full(torch.nn.Module):
     def __init__(self, 
                  conv_size,
                  inp_ch_modes,              
@@ -34,7 +34,7 @@ class TTConv(torch.nn.Module):
         In the constructor we instantiate two nn.Linear modules and assign them as
         member variables.
         """
-        super(TTConv, self).__init__()
+        super(TTConv_full, self).__init__()
         
         self.inp_ch_modes=inp_ch_modes
         self.out_ch_modes=out_ch_modes
@@ -57,49 +57,54 @@ class TTConv(torch.nn.Module):
         
         # should we use clone to keep self.cores untouched? 
         cores = self.cores
+        full = self.filters
         
         #inp_shape = inp.get_shape().as_list()[1:] + one other line
         inp_h, inp_w, inp_ch = list(inp.shape)[1:4] #shape 0 is batchsize
         #tmp = tf.reshape(inp, [-1, inp_h, inp_w, inp_ch])
         tmp = torch.reshape(inp, (-1, inp_h, inp_w, inp_ch))
-        #tmp = tf.transpose(tmp, [0, 3, 1, 2])
-        tmp = torch.transpose(tmp,3,1) # put indice 3 at one
-        tmp = torch.transpose(tmp,2,3) # now 1 is at 3, so switch it with 2
-        
-        #tmp = tf.reshape(tmp, [-1, inp_h, inp_w, 1]) 
-        tmp = torch.reshape(tmp, (-1, inp_h, inp_w, 1)) # why not using inp_h and inp_w as first and second entry?
-        
-        #tmp = tf.nn.conv2d(tmp, filters, [1] + strides + [1], padding)  
-        tmp = F.conv2d(tmp, self.filters,bias=None, stride=self.stride, padding=self.padding)  #might need to look at the order of the stride
-        
-        #tmp shape = [batch_size * inp_ch, h, w, r]
-        #h, w = tmp.get_shape().as_list()[1:3]
-        h, w = list(tmp.shape)[1:3]
-        
-        #tmp = tf.reshape(tmp, [-1, inp_ch, h, w, ranks[0]])
-        tmp = torch.reshape(tmp, (-1, inp_ch, h, w, self.ranks[0]))
-        
-        #tmp = tf.transpose(tmp, [4, 1, 0, 2, 3])        
-        tmp = torch.transpose(tmp, 4, 0) #[4,1,2,3,0]
-        tmp = torch.transpose(tmp, 4, 3) #[4,1,2,0,3]
-        tmp = torch.transpose(tmp, 2, 3) #[4,1,0,2,3]
-        #tmp shape = [r, c, b, h, w]
         
         
         for i in range(self.d):            
-            #tmp = tf.reshape(tmp, [ranks[i] * inp_ch_modes[i], -1])
-            tmp = torch.reshape(tmp, (self.ranks[i] * self.inp_ch_modes[i], -1))
-            #tmp = tf.matmul(cores[i], tmp)
-            tmp = torch.mm(cores[i], tmp)            
-            #tmp = tf.reshape(tmp, [out_ch_modes[i], -1])     
-            tmp = torch.reshape(tmp, (self.out_ch_modes[i], -1))
-            #tmp = tf.transpose(tmp, [1, 0])
-            tmp = torch.transpose(tmp, 1, 0)
-        
+            #full = tf.reshape(full, [-1, ranks[i]])
+            full = torch.reshape(full, (-1, self.ranks[i]))
+            
+            #core = tf.transpose(cores[i], [1, 0])
+            core = torch.transpose(cores[i], 1, 0)
+            
+            #core = tf.reshape(core, [ranks[i], -1])
+            core = torch.reshape(core, (self.ranks[i], -1))
+            
+            #full = tf.matmul(full, core)
+            full = torch.mm(full, core)
+            
         out_ch = np.prod(self.out_ch_modes)
         
-        #out = tf.reshape(tmp, [-1, h, w, out_ch], name='out')
-        out = torch.reshape(tmp, (-1, h, w, out_ch))
+        fshape = [self.conv_size[0], self.conv_size[1]]
+        order = [0, 1]
+        inord = []
+        outord = []
+        for i in range(self.d):
+            fshape.append(self.inp_ch_modes[i])
+            inord.append(2 + 2 * i)
+            fshape.append(self.out_ch_modes[i])
+            outord.append(2 + 2 * i + 1)
+        order += inord + outord
+        
+        #full = tf.reshape(full, fshape)
+        full = torch.reshape(full, tuple(fshape))
+        
+        #full = tf.transpose(full, order)
+        full = full.permute(tuple(order))
+        
+        #full = tf.reshape(full, [window[0], window[1], inp_ch, out_ch])
+        full = torch.reshape(full, (self.conv_size[0], self.conv_size[1], inp_ch, out_ch))
         
         
-        return out
+        tmp = F.conv2d(tmp, full,bias=None, stride=self.stride, padding=self.padding)
+        
+
+        return tmp
+    
+    
+    
