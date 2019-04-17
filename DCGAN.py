@@ -18,20 +18,23 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.autograd import Variable
+import numpy as np
+
+
 
 class generator(nn.Module):
     # initializers
     def __init__(self, d=128):
         super(generator, self).__init__()
-        self.deconv1 = nn.ConvTranspose2d(100, d*8, 4, 1, 0)
+        self.deconv1 = nn.ConvTranspose2d(100, d*8, 4, 1, 0, bias=False)
         self.deconv1_bn = nn.BatchNorm2d(d*8)
-        self.deconv2 = nn.ConvTranspose2d(d*8, d*4, 4, 2, 1)
+        self.deconv2 = nn.ConvTranspose2d(d*8, d*4, 4, 2, 1, bias=False)
         self.deconv2_bn = nn.BatchNorm2d(d*4)
-        self.deconv3 = nn.ConvTranspose2d(d*4, d*2, 4, 2, 1)
+        self.deconv3 = nn.ConvTranspose2d(d*4, d*2, 4, 2, 1, bias=False)
         self.deconv3_bn = nn.BatchNorm2d(d*2)
-        self.deconv4 = nn.ConvTranspose2d(d*2, d, 4, 2, 1)
+        self.deconv4 = nn.ConvTranspose2d(d*2, d, 4, 2, 1, bias=False)
         self.deconv4_bn = nn.BatchNorm2d(d)
-        self.deconv5 = nn.ConvTranspose2d(d, 1, 4, 2, 1)
+        self.deconv5 = nn.ConvTranspose2d(d, 3, 4, 2, 1, bias=False)
         
 
     # weight_init
@@ -55,15 +58,15 @@ class discriminator(nn.Module):
     # initializers
     def __init__(self, d=128):
         super(discriminator, self).__init__()
-        self.conv1 = nn.Conv2d(1, d, 4, 2, 1)
+        self.conv1 = nn.Conv2d(3, d, 4, 2, 1, bias=False)
         self.conv1_bn = nn.BatchNorm2d(d)
-        self.conv2 = nn.Conv2d(d, d*2, 4, 2, 1)
+        self.conv2 = nn.Conv2d(d, d*2, 4, 2, 1, bias=False)
         self.conv2_bn = nn.BatchNorm2d(d*2)
-        self.conv3 = nn.Conv2d(d*2, d*4, 4, 2, 1)
+        self.conv3 = nn.Conv2d(d*2, d*4, 4, 2, 1, bias=False)
         self.conv3_bn = nn.BatchNorm2d(d*4)
-        self.conv4 = nn.Conv2d(d*4, d*8, 4, 2, 1)
+        self.conv4 = nn.Conv2d(d*4, d*8, 4, 2, 1, bias=False)
         self.conv4_bn = nn.BatchNorm2d(d*8)
-        self.conv5 = nn.Conv2d(d*8, 1, 4, 1, 0)
+        self.conv5 = nn.Conv2d(d*8, 1, 4, 1, 0, bias=False)
 
 
     # weight_init
@@ -78,21 +81,20 @@ class discriminator(nn.Module):
         x = F.leaky_relu(self.conv1_bn(self.conv1(input)), 0.2)
         x = F.leaky_relu(self.conv2_bn(self.conv2(x)), 0.2)
         x = F.leaky_relu(self.conv3_bn(self.conv3(x)), 0.2)
-        x = F.leaky_relu(self.conv4_bn(self.conv4(x)), 0.2)
+        x = F.relu(self.conv4_bn(self.conv4(x)))
         temp = self.conv5(x)
         x = torch.sigmoid(temp)
-        
         return x
 
 def normal_init(m, mean, std):
     if isinstance(m, nn.ConvTranspose2d) or isinstance(m, nn.Conv2d):
         m.weight.data.normal_(mean, std)
-        m.bias.data.zero_()
+        # m.bias.data.zero_()
 
 # training parameters
-batch_size = 256
+batch_size = 128
 lr = 0.0002
-lr_D=0.0002
+lr_D=0.002
 train_epoch = 100
 PATH = './MNIST_DCGAN_results'
 NOISE_SIZE = 100
@@ -106,7 +108,6 @@ def show_result(num_epoch, show = False, save = False, path = 'result.png', isFi
 
     G.eval()
     test_images = G(fixed_z_) if isFix else G(z_)
-
     G.train()
 
     size_figure_grid = 5
@@ -118,8 +119,9 @@ def show_result(num_epoch, show = False, save = False, path = 'result.png', isFi
     for k in range(5*5):
         i = k // 5
         j = k % 5
-        ax[i, j].cla()
-        ax[i, j].imshow(test_images[k, :].cpu().data.view(64, 64).numpy(), cmap='gray')
+        ax[i, j].cla() 
+        im = np.transpose(test_images[k, :].cpu().data.numpy(), (1,2,0))
+        ax[i, j].imshow(im/2+0.5)
 
     label = 'Epoch {0}'.format(num_epoch)
     fig.text(0.5, 0.04, label, ha='center')
@@ -161,14 +163,14 @@ img_size = 64
 transform = transforms.Compose([
         transforms.Resize(img_size),
         transforms.ToTensor(),
-        transforms.Normalize(mean=(0.1307,), std=(0.3081,))
+        transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
 ])
 
 
 
 print ("Loading data")
 train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('data', train=True, download=True, transform=transform),
+    datasets.CIFAR10('data', train=True, download=True, transform=transform),
     batch_size=batch_size, shuffle=True)
 print ("Loaded data")
 
@@ -217,7 +219,7 @@ def train_discriminator(input,mini_batch_size):
     z = Variable(z.cuda())
     G_result = G(z) # Generator's result
 
-    D_fake_result = D(G_result)
+    D_fake_result = D(G_result.detach())
     D_fake_loss = BCE_loss(D_fake_result, y_fake)
 
     # Calculating total loss
@@ -271,10 +273,12 @@ def train():
             iter_lim+=1
             if iter_lim == 20:
                 break
+            # x_ = torch.mean(x_, dim=1, keepdim=True)
             mini_batch_size = x_.size()[0]
             D_loss = train_discriminator(x_,mini_batch_size)
             D_losses.append(D_loss)
 
+            G_loss = train_generator(mini_batch_size)
             G_loss = train_generator(mini_batch_size)
             G_losses.append(G_loss)
         print('[%d/%d]: loss_d: %.3f, loss_g: %.3f' % (
