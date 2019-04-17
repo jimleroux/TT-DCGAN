@@ -20,6 +20,7 @@ class Discriminator(nn.Module):
         # input = input.view(-1,28,28)
         # print (input.shape)
         x = self.encoder(inp)
+        x = x.view(-1, self.latentdim)
         x = self.linear(x)
         x = self.sigmoid(x)
         return x

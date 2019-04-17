@@ -10,8 +10,10 @@ from generator import Generator
 from utils.saver import save_gif, save_models
 from utils.showresults import show_result, show_train_hist
 
+MODEL_DIR = "./MNIST_AE_results/"
 
 def train(args):
+    pre_trained = args.pre_trained
     PATH = args.path_results
     lrD = args.lrD
     lrG = args.lrG
@@ -42,6 +44,9 @@ def train(args):
     print("### Create models ###")
     D = Discriminator(filter_cst, latent_dim).to(device)
     G = Generator(filter_cst, latent_dim).to(device)
+    if pre_trained:
+        D.encoder.load(MODEL_DIR)
+        G.decoder.load(MODEL_DIR)
     
     G_optimizer = optim.Adam(
         G.parameters(),
@@ -198,7 +203,11 @@ def main():
         default="cuda",
         help="Specify the computation device"
     )
-
+    parser.add_argument(
+        "--pre_trained",
+        action="store_true",
+        help="Specify the computation device"
+    )
     args = parser.parse_args()
     
     D, G = train(args)
