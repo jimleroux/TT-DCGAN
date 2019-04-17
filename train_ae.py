@@ -13,6 +13,7 @@ def train(args):
     lr = args.lr
     num_epochs = args.num_epochs
     batch_size = args.batch_size
+    img_size = 64
 
     transform = transforms.Compose([
             transforms.Resize(img_size),
