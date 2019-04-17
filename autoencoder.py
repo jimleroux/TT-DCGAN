@@ -1,6 +1,11 @@
+import time
+
+import numpy as np
 import torch
 import torch.nn as nn
-import time
+from torchvision.transforms import ToPILImage
+
+from utils.visualization import append_images
 
 MODEL_DIR = "./MNIST_AE_results/"
 
@@ -95,11 +100,13 @@ class Autoencoder(nn.Module):
 
             if (epoch + 1) % print_every == 0:
                 epoch_time = self._get_time(start_time, time.time())
-            print('epoch: {} | Train loss: {:.3f} | time: {}'.format(
+                print('epoch: {} | Train loss: {:.3f} | time: {}'.format(
                     epoch + 1,
                     train_loss,
                     epoch_time)
                 )
+                self.plot_reconstruction(trainloader, epoch + 1)
+
         print("Saving model...")
         self.save(MODEL_DIR)
         print('Autoencoder trained.')
@@ -114,6 +121,14 @@ class Autoencoder(nn.Module):
         seconds = round(total_time % 60)
         return '{} min., {} sec.'.format(minutes, seconds)
 
+    def plot_reconstruction(self, trainloader, epoch):
+        sample, _ = trainloader.dataset[round(np.random.uniform(0, len(trainloader.dataset)))]
+        sample = sample.to(self.device)
+        sample = sample.unsqueeze(0)
+        recons = self.forward(sample)
 
+        sample = ToPILImage(mode='RGB')(sample.squeeze(0).cpu())
+        recons = ToPILImage(mode='RGB')(recons.squeeze(0).cpu())
 
-    
+        combined = append_images([sample, recons])
+        combined.save('./images/reconstructions/epoch{}.jpg'.format(epoch))
