@@ -31,7 +31,8 @@ def train(args):
     )
     print("### Loaded data ###")
 
-    model = Autoencoder()
+    model = Autoencoder(device=DEVICE)
+    model.to(DEVICE)
     model.fit(train_loader, lr, num_epochs)
 
 if __name__ == "__main__":

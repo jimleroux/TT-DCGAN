@@ -66,11 +66,12 @@ class Decoder(nn.Module):
         self.load_state_dict(weight)
 
 class Autoencoder(nn.Module):
-    def __init__(self):
+    def __init__(self, device):
         super(Autoencoder, self).__init__()
         self.encoder = Encoder()
         self.decoder = Decoder()
         self.mse = nn.MSELoss()
+        self.device = device
 
     def forward(self, x):
         output = self.encoder(x)
