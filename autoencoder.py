@@ -2,9 +2,6 @@ import torch
 import torch.nn as nn
 import time
 
-from generator import Generator
-from discriminator import Discriminator
-
 MODEL_DIR = "./MNIST_AE_results/"
 
 class Encoder(nn.Module):
@@ -66,10 +63,10 @@ class Decoder(nn.Module):
         self.load_state_dict(weight)
 
 class Autoencoder(nn.Module):
-    def __init__(self, device):
+    def __init__(self, device, d):
         super(Autoencoder, self).__init__()
-        self.encoder = Encoder()
-        self.decoder = Decoder()
+        self.encoder = Encoder(d=d)
+        self.decoder = Decoder(d=d)
         self.mse = nn.MSELoss()
         self.device = device
 
@@ -85,7 +82,7 @@ class Autoencoder(nn.Module):
         for epoch in range(n_epochs):
             self.train()
             train_loss = 0
-            for inputs in trainloader:
+            for inputs, _ in trainloader:
                 inputs = inputs.to(self.device)
                 recons = self.forward(inputs)
                 loss = self.mse(recons, inputs)

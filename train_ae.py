@@ -13,6 +13,7 @@ def train(args):
     lr = args.lr
     num_epochs = args.num_epochs
     batch_size = args.batch_size
+    filter_cst = args.filtercst
     img_size = 64
 
     transform = transforms.Compose([
@@ -31,7 +32,7 @@ def train(args):
     )
     print("### Loaded data ###")
 
-    model = Autoencoder(device=DEVICE)
+    model = Autoencoder(device=DEVICE, d=filter_cst)
     model.to(DEVICE)
     model.fit(train_loader, lr, num_epochs)
 
@@ -46,6 +47,10 @@ if __name__ == "__main__":
     parser.add_argument('--lr',
                         type=int,
                         default=0.0003)
+    parser.add_argument("--filtercst",
+                        type=int,
+                        default=128,
+                        help="Multiplicative constant for the number of filters.")
     args = parser.parse_args()
     train(args)    
 
