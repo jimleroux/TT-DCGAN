@@ -21,7 +21,6 @@ from torch.autograd import Variable
 import numpy as np
 
 
-
 class generator(nn.Module):
     # initializers
     def __init__(self, d=128):
