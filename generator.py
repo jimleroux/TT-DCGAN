@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 from utils.initialization import normal_init
-
+from autoencoder import Decoder
 
 class Generator(nn.Module):
     # initializers
@@ -10,34 +10,13 @@ class Generator(nn.Module):
         super(Generator, self).__init__()
         self.latentdim = latentdim
         self.d = d
-        self.layers = nn.Sequential(
-            nn.ConvTranspose2d(latentdim, d*8, 4, 1, 0, bias=False),
-            nn.BatchNorm2d(d*8),
-            nn.LeakyReLU(0.2),
-            nn.ConvTranspose2d(d*8, d*4, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(d*4),
-            nn.LeakyReLU(0.2),
-            nn.ConvTranspose2d(d*4, d*2, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(d*2),
-            nn.LeakyReLU(0.2),
-            nn.ConvTranspose2d(d*2, d, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(d),
-            nn.LeakyReLU(0.2),
-            nn.ConvTranspose2d(d, 3, 4, 2, 1, bias=False),
-            nn.Tanh()
-        )
-        self.weight_init(mean=0., std=0.02)
-    
-    # weight_init
-    def weight_init(self, mean, std):
-        for m in self._modules:
-            normal_init(self._modules[m], mean, std)
+        self.decoder = Decoder(d=d, latentdim=latentdim)
 
     # forward method
     def forward(self, inp):
         # x = F.relu(self.deconv1(input))
         x = inp.view(-1,self.latentdim,1,1)
-        x = self.layers(x)
+        x = self.decoder(x)
         return x
 
     def train_step(self, discriminator, mini_batch_size, optimizer, criterion, device):
