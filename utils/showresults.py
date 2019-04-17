@@ -1,15 +1,22 @@
-import matplotlib.pyplot as plt
 import itertools
+
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
 
 
 def show_result(
-        G, latentdim, fixed_z_, num_epoch, device, show = False, save = False,
-        path = 'result.png', isFix=False
+        G, latent_dim,
+        fixed_z_,
+        z_,
+        num_epoch,
+        device,
+        show = False,
+        save = False,
+        path = 'result.png',
+        isFix=False
     ):
-
-    fixed_z_ = torch.randn((5 * 5, latentdim)).to(device)    # fixed noise
-    z_ = torch.randn((5*5, NOISE_SIZE))
-    z_ = Variable(z_.cuda())
+    # fixed noise
 
     G.eval()
     test_images = G(fixed_z_) if isFix else G(z_)
@@ -39,7 +46,9 @@ def show_result(
         plt.close()
 
 def show_train_hist(
-        hist, show = False, save = False,
+        hist,
+        show = False,
+        save = False,
         path = 'Train_hist.png'
     ):
 

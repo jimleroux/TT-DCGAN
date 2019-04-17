@@ -1,11 +1,13 @@
+import torch
 import torch.nn as nn
+
 from utils.initialization import normal_init
 
 
 class Generator(nn.Module):
     # initializers
     def __init__(self, d=128, latentdim=100):
-        super(generator, self).__init__()
+        super(Generator, self).__init__()
         self.latentdim = latentdim
         self.d = d
         self.layers = nn.Sequential(
@@ -21,7 +23,7 @@ class Generator(nn.Module):
             nn.ConvTranspose2d(d*2, d, 4, 2, 1, bias=False),
             nn.BatchNorm2d(d),
             nn.LeakyReLU(0.2),
-            nn.ConvTranspose2d(d, 3, 4, 2, 1, bias=False)   
+            nn.ConvTranspose2d(d, 3, 4, 2, 1, bias=False),
             nn.Tanh()
         )
         self.weight_init(mean=0., std=0.02)
@@ -48,7 +50,7 @@ class Generator(nn.Module):
         # Comparing discriminator's prediction with ones (ie, real)
         G_result = self(z)
         D_result = discriminator(G_result).view((-1))
-        G_train_loss = BCE_loss(D_result, y)
+        G_train_loss = criterion(D_result, y)
 
         # Propogate loss backwards and return loss
         G_train_loss.backward()

@@ -1,23 +1,27 @@
+import torch
 import torch.nn as nn
+
 from utils.initialization import normal_init
+
 
 class Discriminator(nn.Module):
     # initializers
-    def __init__(self, d=128):
-        super(discriminator, self).__init__()
+    def __init__(self, d=128, latentdim=100):
+        super(Discriminator, self).__init__()
+        self.latentdim = latentdim
         self.layers = nn.Sequential(
             nn.Conv2d(3, d, 4, 2, 1, bias=False),
             nn.BatchNorm2d(d),
-            nn.LeakyReLU(0.2)
+            nn.LeakyReLU(0.2),
             nn.Conv2d(d, d*2, 4, 2, 1, bias=False),
             nn.BatchNorm2d(d*2),
-            nn.LeakyReLU(0.2)
+            nn.LeakyReLU(0.2),
             nn.Conv2d(d*2, d*4, 4, 2, 1, bias=False),
             nn.BatchNorm2d(d*4),
-            nn.LeakyReLU(0.2)
+            nn.LeakyReLU(0.2),
             nn.Conv2d(d*4, d*8, 4, 2, 1, bias=False),
             nn.BatchNorm2d(d*8),
-            nn.ReLU(0.2)
+            nn.ReLU(0.2),
             nn.Conv2d(d*8, 1, 4, 1, 0, bias=False),
             nn.Sigmoid()
         )
@@ -42,10 +46,10 @@ class Discriminator(nn.Module):
         y_fake = torch.zeros(mini_batch_size).to(device) # D(fake) = 0
 
         D_real_result = self(x).view((-1))
-        D_real_loss = BCE_loss(D_real_result, y_real)
+        D_real_loss = criterion(D_real_result, y_real)
 
         # Calculate loss for generated sample
-        z = torch.randn((mini_batch_size, NOISE_SIZE)).to(device)
+        z = torch.randn((mini_batch_size, self.latentdim)).to(device)
         G_result = generator(z) # Generator's result
 
         D_fake_result = self(G_result.detach())

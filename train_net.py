@@ -1,9 +1,15 @@
-import torch
 import argparse
-from generator import Generator
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torchvision import datasets, transforms
+
 from discriminator import Discriminator
+from generator import Generator
+from utils.saver import save_gif, save_models
 from utils.showresults import show_result, show_train_hist
-from utils.saver import save_models, save_gif
+
 
 def train(args):
     PATH = args.path_results
@@ -34,8 +40,8 @@ def train(args):
     print("### Loaded data ###")
 
     print("### Create models ###")
-    D = Discriminator(filter_cst).to(device)
-    G = Generator(filter_cst).to(device)
+    D = Discriminator(filter_cst, latent_dim).to(device)
+    G = Generator(filter_cst, latent_dim).to(device)
     
     G_optimizer = optim.Adam(
         G.parameters(),
@@ -54,11 +60,17 @@ def train(args):
     }
     
     BCE_loss = nn.BCELoss()
+    fixed_z_ = torch.randn((5 * 5, latent_dim)).to(device)    # fixed noise
     for epoch in range(epochs):
         D_losses = []
         G_losses = []
+        i = 0
         for x, _ in train_loader:
+            i += 1
+            if i > 20:
+                break
             # x_ = torch.mean(x_, dim=1, keepdim=True)
+            x = x.to(device)
             D_loss = D.train_step(
                 x,
                 G,
@@ -68,14 +80,14 @@ def train(args):
             )
             G_loss = G.train_step(
                 D,
-                mini_batch_size,
+                batch_size,
                 G_optimizer,
                 BCE_loss,
                 device
             )
             G_loss = G.train_step(
                 D,
-                mini_batch_size,
+                batch_size,
                 G_optimizer,
                 BCE_loss,
                 device
@@ -98,11 +110,13 @@ def train(args):
         )
         p = PATH+'/Random_results/MNIST_DCGAN_' + str(epoch + 1) + '.png'
         fixed_p = PATH+'/Fixed_results/MNIST_DCGAN_' + str(epoch + 1) + '.png'
-        fixed_z_ = torch.randn((5 * 5, latent_dim)).to(device)    # fixed noise
+        z_ = torch.randn((5*5, latent_dim)).to(device)
         show_result(
             G,
-            latentdim,
+            latent_dim,
             fixed_z_,
+            z_,
+            device,
             (epoch+1),
             save=True,
             path=p,
@@ -110,8 +124,10 @@ def train(args):
         )
         show_result(
             G,
-            latentdim,
+            latent_dim,
             fixed_z_,
+            z_,
+            device,
             (epoch+1),
             save=True,
             path=fixed_p,
@@ -179,7 +195,7 @@ def main():
     parser.add_argument(
         "--device",
         type=str,
-        default="cuda"
+        default="cuda",
         help="Specify the computation device"
     )
 
