@@ -71,9 +71,9 @@ def train(args):
         G_losses = []
         i = 0
         for x, _ in train_loader:
-            i += 1
-            if i > 20:
-                break
+            # i += 1
+            # if i > 20:
+            #     break
             # x_ = torch.mean(x_, dim=1, keepdim=True)
             x = x.to(device)
             D_loss = D.train_step(
@@ -90,14 +90,7 @@ def train(args):
                 BCE_loss,
                 device
             )
-            G_loss = G.train_step(
-                D,
-                batch_size,
-                G_optimizer,
-                BCE_loss,
-                device
-            )
-            
+
             D_losses.append(D_loss)
             G_losses.append(G_loss)
         
