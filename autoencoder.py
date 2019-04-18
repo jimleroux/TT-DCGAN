@@ -70,7 +70,7 @@ class Encoder(nn.Module):
         else:
             self.layers = nn.Sequential(
                 nn.Conv2d(
-                    in_channels=3,
+                    in_channels=1,
                     out_channels=d,
                     kernel_size=4,
                     stride=2,
@@ -81,8 +81,8 @@ class Encoder(nn.Module):
                 nn.LeakyReLU(0.2),
                 TTConv(
                     conv_size=[4,4],
-                    inp_ch_modes=[4,2,2,2],
-                    out_ch_modes=[4,4,2,2],
+                    inp_ch_modes=[4,2,2,1],
+                    out_ch_modes=[4,4,2,1],
                     ranks=[8,4,4,4,1],
                     stride=2,
                     padding=1
@@ -91,8 +91,8 @@ class Encoder(nn.Module):
                 nn.LeakyReLU(0.2),
                 TTConv(
                     conv_size=[4,4],
-                    inp_ch_modes=[4,4,2,2],
-                    out_ch_modes=[4,4,4,2],
+                    inp_ch_modes=[4,4,2,1],
+                    out_ch_modes=[4,4,4,1],
                     ranks=[8,4,4,4,1],
                     stride=2,
                     padding=1
@@ -101,8 +101,8 @@ class Encoder(nn.Module):
                 nn.LeakyReLU(0.2),
                 TTConv(
                     conv_size=[4,4],
-                    inp_ch_modes=[4,4,4,2],
-                    out_ch_modes=[4,4,4,4],
+                    inp_ch_modes=[4,4,4,1],
+                    out_ch_modes=[4,4,4,2],
                     ranks=[8,4,4,4,1],
                     stride=2,
                     padding=1
@@ -111,7 +111,7 @@ class Encoder(nn.Module):
                 nn.ReLU(0.2),
                 TTConv(
                     conv_size=[4,4],
-                    inp_ch_modes=[4,4,4,4],
+                    inp_ch_modes=[4,4,4,2],
                     out_ch_modes=[5,5,2,2],
                     ranks=[8,4,4,4,1],
                     stride=1,
@@ -190,7 +190,7 @@ class Decoder(nn.Module):
                 TTDeconv(
                     conv_size=[4,4],
                     inp_ch_modes=[5,5,2,2],
-                    out_ch_modes=[4,4,4,4],
+                    out_ch_modes=[4,4,4,2],
                     ranks=[8,4,4,4,1],
                     stride=1,
                     padding=0
@@ -199,8 +199,8 @@ class Decoder(nn.Module):
                 nn.LeakyReLU(0.2),
                 TTDeconv(
                     conv_size=[4,4],
-                    inp_ch_modes=[4,4,4,4],
-                    out_ch_modes=[4,4,4,2],
+                    inp_ch_modes=[4,4,4,2],
+                    out_ch_modes=[4,4,4,1],
                     ranks=[8,4,4,4,1],
                     stride=2,
                     padding=1
@@ -209,8 +209,8 @@ class Decoder(nn.Module):
                 nn.LeakyReLU(0.2),
                 TTDeconv(
                     conv_size=[4,4],
-                    inp_ch_modes=[4,4,4,2],
-                    out_ch_modes=[4,4,2,2],
+                    inp_ch_modes=[4,4,4,1],
+                    out_ch_modes=[4,4,2,1],
                     ranks=[8,4,4,4,1],
                     stride=2,
                     padding=1
@@ -219,8 +219,8 @@ class Decoder(nn.Module):
                 nn.LeakyReLU(0.2),
                 TTDeconv(
                     conv_size=[4,4],
-                    inp_ch_modes=[4,4,2,2],
-                    out_ch_modes=[4,2,2,2],
+                    inp_ch_modes=[4,4,2,1],
+                    out_ch_modes=[4,2,2,1],
                     ranks=[8,4,4,4,1],
                     stride=2,
                     padding=1
@@ -235,22 +235,22 @@ class Decoder(nn.Module):
                 # ),
                 nn.BatchNorm2d(d),
                 nn.LeakyReLU(0.2),
-                TTDeconv(
-                    conv_size=[4,4],
-                    inp_ch_modes=[2,2,2,4],
-                    out_ch_modes=[1,1,1,3],
-                    ranks=[8,4,4,4,1],
-                    stride=2,
-                    padding=1
-                ),                  
-                # nn.ConvTranspose2d(
-                #     in_channels=d,
-                #     out_channels=3,
-                #     kernel_size=4,
+                # TTDeconv(
+                #     conv_size=[4,4],
+                #     inp_ch_modes=[4,2,2,2],
+                #     out_ch_modes=[3,1,1,1],
+                #     ranks=[8,4,4,4,1],
                 #     stride=2,
-                #     padding=1,
-                #     bias=False
-                # ),
+                #     padding=1
+                # ),                  
+                nn.ConvTranspose2d(
+                    in_channels=d,
+                    out_channels=1,
+                    kernel_size=4,
+                    stride=2,
+                    padding=1,
+                    bias=False
+                ),
                 nn.Tanh()
             )
     def forward(self, inp):

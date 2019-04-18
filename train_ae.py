@@ -20,11 +20,11 @@ def train(args):
     transform = transforms.Compose([
             transforms.Resize(img_size),
             transforms.ToTensor(),
-            transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+            transforms.Normalize(mean=(0.5,), std=(0.5,))
     ])
     print("### Loading data ###")
     train_loader = torch.utils.data.DataLoader(
-        datasets.CIFAR10('data', train=True, download=True, transform=transform),
+        datasets.MNIST('data', train=True, download=True, transform=transform),
         batch_size=batch_size,
         shuffle=True
     )
