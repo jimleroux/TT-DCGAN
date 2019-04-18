@@ -142,6 +142,7 @@ def train(args):
     save_models(
         D,
         G,
+        PATH,
         train_hist,
         epochs
     )
