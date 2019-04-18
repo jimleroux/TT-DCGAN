@@ -152,7 +152,8 @@ def train(args):
         path=PATH+'/MNIST_DCGAN_train_hist.png'
     )
     save_gif(PATH, epochs)
-
+    
+    return D, G
 
 def main():
     parser = argparse.ArgumentParser(description="TDCGAN")
