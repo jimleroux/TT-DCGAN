@@ -4,6 +4,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
+def show_recons(images, num_epoch, num_samp, path):
+    fig, ax = plt.subplots(num_samp, 2, figsize=(num_samp, 2))
+    for i, j in itertools.product(range(num_samp), range(2)):
+        ax[i, j].get_xaxis().set_visible(False)
+        ax[i, j].get_yaxis().set_visible(False)
+
+    for i in range(2):
+        test_images = images[i]
+        for j in range(num_samp):
+            ax[i, j].cla() 
+            im = np.transpose(test_images[j, :].cpu().data.numpy(), (1,2,0))
+            ax[i, j].imshow(im/2+0.5)
+
+    label = 'Epoch {0}'.format(num_epoch)
+    fig.text(0.5, 0.04, label, ha='center')
+    plt.savefig(path)  
 
 def show_result(
         G,

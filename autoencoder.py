@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from torchvision.transforms import ToPILImage
 
-from utils.visualization import append_images
+from utils.showresults import show_recons
 
 MODEL_DIR = "./MNIST_AE_results/"
 
@@ -127,14 +127,19 @@ class Autoencoder(nn.Module):
         seconds = round(total_time % 60)
         return '{} min., {} sec.'.format(minutes, seconds)
 
-    def plot_reconstruction(self, trainloader, epoch):
-        sample, _ = trainloader.dataset[round(np.random.uniform(0, len(trainloader.dataset)))]
-        sample = sample.to(self.device)
-        sample = sample.unsqueeze(0)
-        recons = self.forward(sample)
+    def plot_reconstruction(self, trainloader, epoch, num_samp=5):
+        samples = []
+        recons = []
+        for _ in range(num_samp):
+            sample, _ = trainloader.dataset[round(np.random.uniform(0, len(trainloader.dataset)))]
+            sample = sample.to(self.device)
+            sample = sample.unsqueeze(0)
+            rec = self.forward(sample)
 
-        sample = ToPILImage(mode='RGB')(sample.squeeze(0).cpu())
-        recons = ToPILImage(mode='RGB')(recons.squeeze(0).cpu())
+            samples.append(sample)
+            recons.append(rec)
+
+        images = [samples, recons]
 
         # Create directory for images
         if not os.path.isdir("./images"):
@@ -142,5 +147,6 @@ class Autoencoder(nn.Module):
         if not os.path.isdir("./images"+"/reconstructions"):
             os.mkdir("./images"+"/reconstructions")
 
-        combined = append_images([sample, recons])
-        combined.save('./images/reconstructions/epoch{}.jpg'.format(epoch))
+        show_recons(images, epoch, num_samp, "./images/reconstructions/epoch{}.jpg".format(epoch))
+
+
