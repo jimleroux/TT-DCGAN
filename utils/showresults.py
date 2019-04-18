@@ -6,7 +6,8 @@ import torch
 
 
 def show_result(
-        G, latent_dim,
+        G,
+        latent_dim,
         fixed_z_,
         z_,
         num_epoch,
@@ -56,9 +57,11 @@ def show_train_hist(
 
     y1 = hist['D_losses']
     y2 = hist['G_losses']
+    y3 = hist['G_fix_losses']
 
     plt.plot(x, y1, label='D_loss')
     plt.plot(x, y2, label='G_loss')
+    plt.plot(x, y3, label='G_fix_loss')
 
     plt.xlabel('Epoch')
     plt.ylabel('Loss')

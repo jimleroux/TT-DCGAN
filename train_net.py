@@ -11,6 +11,7 @@ from discriminator import Discriminator
 from generator import Generator
 from utils.saver import save_gif, save_models
 from utils.showresults import show_result, show_train_hist
+from dataloader import load_dataset
 
 MODEL_DIR = "./MNIST_AE_results/"
 
@@ -25,7 +26,7 @@ def train(args):
     filter_cst = args.filtercst
     device = args.device
     save_every = args.save_every
-    img_size = 64    
+    data = args.data  
 
     # Create directory for results
     if not os.path.isdir(PATH):
@@ -35,18 +36,8 @@ def train(args):
     if not os.path.isdir(PATH+'/Fixed_results'):
         os.mkdir(PATH+'/Fixed_results')
 
-    transform = transforms.Compose([
-            transforms.Resize(img_size),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
-    ])
-
     print("### Loading data ###")
-    train_loader = torch.utils.data.DataLoader(
-        datasets.CIFAR10('data', train=True, download=True, transform=transform),
-        batch_size=batch_size,
-        shuffle=True
-    )
+    train_loader = load_dataset(data, batch_size)
     print("### Loaded data ###")
 
     print("### Create models ###")
@@ -69,7 +60,8 @@ def train(args):
     
     train_hist = {
         'D_losses':[],
-        'G_losses':[]
+        'G_losses':[],
+        'G_fix_losses':[]
     }
     
     BCE_loss = nn.BCELoss()
@@ -79,12 +71,8 @@ def train(args):
             D_test = copy.deepcopy(D)
         D_losses = []
         G_losses = []
-        i = 0
+        G_fix_losses = []
         for x, _ in train_loader:
-            # i += 1
-            # if i > 20:
-            #     break
-            # x_ = torch.mean(x_, dim=1, keepdim=True)
             x = x.to(device)
             D_loss = D.train_step(
                 x,
@@ -93,8 +81,8 @@ def train(args):
                 BCE_loss,
                 device
             )
-            
-            G.train_step(
+
+            G_loss = G.train_step(
                 D,
                 batch_size,
                 G_optimizer,
@@ -102,7 +90,7 @@ def train(args):
                 device
             )
 
-            G_loss = G.evaluate(
+            G_fix_loss = G.evaluate(
                 D_test,
                 batch_size,
                 BCE_loss,
@@ -111,17 +99,21 @@ def train(args):
 
             D_losses.append(D_loss)
             G_losses.append(G_loss)
+            G_fix_losses.append(G_fix_loss)
         
         meanDloss = torch.mean(torch.FloatTensor(D_losses))
         meanGloss = torch.mean(torch.FloatTensor(G_losses))
+        meanGFloss = torch.mean(torch.FloatTensor(G_fix_losses))
         train_hist['D_losses'].append(meanDloss)
         train_hist['G_losses'].append(meanGloss)
+        train_hist['G_fix_losses'].append(meanGFloss)
         print(
-            "[{:d}/{:d}]: loss_d: {:.3f}, loss_g: {:.3f}".format(
+            "[{:d}/{:d}]: loss_d: {:.3f}, loss_g: {:.3f}, loss_g_fix: {:.3f}".format(
                 epoch + 1,
                 epochs,
                 meanDloss,
-                meanGloss
+                meanGloss,
+                meanGFloss
             )
         )
         p = PATH+'/Random_results/MNIST_DCGAN_' + str(epoch + 1) + '.png'
@@ -227,6 +219,12 @@ def main():
         type=int,
         default=5,
         help="Save discriminator every n epochs specified to compute loss."
+    )
+    parser.add_argument(
+        "--data",
+        type=str,
+        default="cifar",
+        help="Load dataset specified. mnist or cifar(default)."
     )
     args = parser.parse_args()
     

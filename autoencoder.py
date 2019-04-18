@@ -85,7 +85,7 @@ class Autoencoder(nn.Module):
         return output
 
     def fit(self, trainloader, lr, n_epochs, print_every=1):
-        print("Training autoencoer...")
+        print("Training autoencoder...")
         start_time = time.time()
         _optimizer = torch.optim.Adam(self.parameters(), lr=lr)
         for epoch in range(n_epochs):
