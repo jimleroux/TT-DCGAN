@@ -115,7 +115,9 @@ class Autoencoder(nn.Module):
         self.save(MODEL_DIR)
         print('Autoencoder trained.')
 
-    def save(self, model_path: str):    
+    def save(self, model_path: str):
+        if not os.path.isdir(model_path):
+            os.mkdir(model_path)
         torch.save(self.encoder.state_dict(), model_path+"encoder_param.pkl")
         torch.save(self.decoder.state_dict(), model_path+"decoder_param.pkl")
 
