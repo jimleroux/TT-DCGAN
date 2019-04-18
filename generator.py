@@ -35,3 +35,18 @@ class Generator(nn.Module):
         G_train_loss.backward()
         optimizer.step()
         return G_train_loss.item()
+
+    def evaluate(self, discriminator, mini_batch_size, criterion, device):
+        self.eval()
+        with torch.no_grad():
+            # Generate z with random values
+            z = torch.randn((mini_batch_size, self.latentdim)).to(device)
+            y = torch.ones(mini_batch_size).to(device)     # Attempting to be real
+
+            # Calculate loss for generator
+            # Comparing discriminator's prediction with ones (ie, real)
+            G_result = self(z)
+            D_result = discriminator(G_result).view((-1))
+            G_train_loss = criterion(D_result, y)
+
+        return G_train_loss            

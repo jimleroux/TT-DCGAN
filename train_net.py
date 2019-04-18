@@ -93,10 +93,18 @@ def train(args):
                 BCE_loss,
                 device
             )
-            G_loss = G.train_step(
-                D_test,
+            
+            G.train_step(
+                D,
                 batch_size,
                 G_optimizer,
+                BCE_loss,
+                device
+            )
+
+            G_loss = G.evaluate(
+                D_test,
+                batch_size,
                 BCE_loss,
                 device
             )
