@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from torchvision.transforms import ToPILImage
 from tlayers.TTConv import TTConv
-from tlayer.TTDeconv
+from tlayers.TTDeconv import TTDeconv
 
 from utils.visualization import append_images
 
@@ -19,35 +19,104 @@ class Encoder(nn.Module):
         self.latentdim = latentdim
         if TT == False:
             self.layers = nn.Sequential(
-                nn.Conv2d(3, d, 4, 2, 1, bias=False),
+                nn.Conv2d(
+                    in_channels=3,
+                    out_channels=d,
+                    kernel_size=4,
+                    stride=2,
+                    padding=1,
+                    bias=False
+                ),
                 nn.BatchNorm2d(d),
                 nn.LeakyReLU(0.2),
-                nn.Conv2d(d, d*2, 4, 2, 1, bias=False),
+                nn.Conv2d(in_channels=d,
+                    out_channels=d*2,
+                    kernel_size=4,
+                    stride=2,
+                    padding=1,
+                    bias=False
+                ),
                 nn.BatchNorm2d(d*2),
                 nn.LeakyReLU(0.2),
-                nn.Conv2d(d*2, d*4, 4, 2, 1, bias=False),
+                nn.Conv2d(
+                    in_channels=d*2,
+                    out_channels=d*4,
+                    kernel_size=4,
+                    stride=2,
+                    padding=1,
+                    bias=False
+                ),
                 nn.BatchNorm2d(d*4),
                 nn.LeakyReLU(0.2),
-                nn.Conv2d(d*4, d*8, 4, 2, 1, bias=False),
+                nn.Conv2d(
+                    in_channels=d*4,
+                    out_channels=d*8,
+                    kernel_size=4,
+                    stride=2,
+                    padding=1,
+                    bias=False
+                ),
                 nn.BatchNorm2d(d*8),
                 nn.ReLU(0.2),
-                nn.Conv2d(d*8, self.latentdim, 4, 1, 0, bias=False)
+                nn.Conv2d(
+                    in_channels=d*8,
+                    out_channels=self.latentdim,
+                    kernel_size=4,
+                    stride=2,
+                    padding=1,
+                    bias=False
+                )
             )    
         else:
             self.layers = nn.Sequential(
-                nn.Conv2d(1, d, 4, 2, 1,bias=False),
+                nn.Conv2d(
+                    in_channels=3,
+                    out_channels=d,
+                    kernel_size=4,
+                    stride=2,
+                    padding=1,
+                    bias=False
+                ),
                 nn.BatchNorm2d(d),
                 nn.LeakyReLU(0.2),
-                TTConv([4,4],[4,2,2,2],[2,2,4,4],[32,16,16,16,1],2,1),
+                TTConv(
+                    conv_size=[4,4],
+                    inp_ch_modes=[4,2,2,2],
+                    out_ch_modes=[2,2,4,4],
+                    ranks=[32,16,16,16,1],
+                    stride=2,
+                    padding=1
+                ),
                 nn.BatchNorm2d(d*2),
                 nn.LeakyReLU(0.2),
-                TTConv([4,4],[2,2,4,4],[4,4,4,2],[32,16,16,16,1],2,1),
+                TTConv(
+                    conv_size=[4,4],
+                    inp_ch_modes=[2,2,4,4],
+                    out_ch_modes=[4,4,4,2],
+                    ranks=[32,16,16,16,1],
+                    stride=2,
+                    padding=1
+                ),
                 nn.BatchNorm2d(d*4),
                 nn.LeakyReLU(0.2),
-                TTConv([4,4],[4,4,4,2],[4,4,4,4],[32,16,16,16,1],2,1),
+                TTConv(
+                    conv_size=[4,4],
+                    inp_ch_modes=[4,4,4,2],
+                    out_ch_modes=[4,4,4,4],
+                    ranks=[32,16,16,16,1],
+                    stride=2,
+                    padding=1
+                ),
                 nn.BatchNorm2d(d*8),
                 nn.ReLU(0.2),
-                TTConv([4,4],[4,4,4,4],[1,1,1,1],[32,16,16,16,1],1,1)
+                TTConv(
+                    conv_size=[4,4],
+                    inp_ch_modes=[4,4,4,4],
+                    out_ch_modes=[4,4,4,2],
+                    ranks=[32,16,16,16,1],
+                    stride=1,
+                    padding=0
+                )
             )
     def forward(self, inp):
         output = self.layers(inp)
@@ -65,36 +134,104 @@ class Decoder(nn.Module):
         self.d = d
         if TT == False:
             self.layers = nn.Sequential(
-                nn.ConvTranspose2d(latentdim, d*8, 4, 1, 0, bias=False),
+                nn.ConvTranspose2d(
+                    in_channels=latentdim,
+                    out_channels=d*8,
+                    kernel_size=4,
+                    stride=1,
+                    padding=0,
+                    bias=False
+                ),
                 nn.BatchNorm2d(d*8),
                 nn.LeakyReLU(0.2),
-                nn.ConvTranspose2d(d*8, d*4, 4, 2, 1, bias=False),
+                nn.ConvTranspose2d(
+                    in_channels=d*8,
+                    out_channels=d*4,
+                    kernel_size=4,
+                    stride=2,
+                    padding=1,
+                    bias=False
+                ),
                 nn.BatchNorm2d(d*4),
                 nn.LeakyReLU(0.2),
-                nn.ConvTranspose2d(d*4, d*2, 4, 2, 1, bias=False),
+                nn.ConvTranspose2d(
+                    in_channels=d*4,
+                    out_channels=d*2,
+                    kernel_size=4,
+                    stride=2,
+                    padding=1,
+                    bias=False
+                ),
                 nn.BatchNorm2d(d*2),
                 nn.LeakyReLU(0.2),
-                nn.ConvTranspose2d(d*2, d, 4, 2, 1, bias=False),
+                nn.ConvTranspose2d(
+                    in_channels=d*2,
+                    out_channels=d,
+                    kernel_size=4,
+                    stride=2,
+                    padding=1,
+                    bias=False
+                ),
                 nn.BatchNorm2d(d),
                 nn.LeakyReLU(0.2),
-                nn.ConvTranspose2d(d, 3, 4, 2, 1, bias=False),
+                nn.ConvTranspose2d(
+                    in_channels=d,
+                    out_channels=3,
+                    kernel_size=4,
+                    stride=2,
+                    padding=1,
+                    bias=False
+                ),
                 nn.Tanh()
             )
         else:
             self.layers = nn.Sequential(
-                TTDeconv([4,4],[4,4,4,2],[4,4,4,4],[32,16,16,16,1],2,1),
+                TTDeconv(
+                    conv_size=[4,4],
+                    inp_ch_modes=[4,4,4,2],
+                    out_ch_modes=[4,4,4,4],
+                    ranks=[32,16,16,16,1],
+                    stride=1,
+                    padding=0
+                ),
                 nn.BatchNorm2d(d*8),
                 nn.LeakyReLU(0.2),
-                TTDeconv([4,4],[4,4,4,4],[4,4,4,2],[32,16,16,16,1],2,1),
+                TTDeconv(
+                    conv_size=[4,4],
+                    inp_ch_modes=[4,4,4,4],
+                    out_ch_modes=[4,4,4,2],
+                    ranks=[32,16,16,16,1],
+                    stride=2,
+                    padding=1
+                ),
                 nn.BatchNorm2d(d*4),
                 nn.LeakyReLU(0.2),
-                TTDeconv([4,4],[4,4,4,2],[2,2,4,4],[32,16,16,16,1],2,1),
+                TTDeconv(
+                    conv_size=[4,4],
+                    inp_ch_modes=[4,4,4,2],
+                    out_ch_modes=[2,2,4,4],
+                    ranks=[32,16,16,16,1],
+                    stride=2,
+                    padding=1),
                 nn.BatchNorm2d(d*2),
                 nn.LeakyReLU(0.2),
-                nn.ConvTranspose2d(d*2, d, 4, 2, 1,bias=False),
+                nn.ConvTranspose2d(
+                    in_channels=d*2,
+                    out_channels=d,
+                    kernel_size=4,
+                    stride=2,
+                    padding=1,
+                    bias=False),
                 nn.BatchNorm2d(d),
                 nn.LeakyReLU(0.2),
-                nn.ConvTranspose2d(d, 1, 4, 2, 1,bias=False),
+                nn.ConvTranspose2d(
+                    in_channels=d,
+                    out_channels=3,
+                    kernel_size=4,
+                    stride=2,
+                    padding=1,
+                    bias=False
+                ),
                 nn.Tanh()
             )
     def forward(self, inp):

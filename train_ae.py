@@ -54,7 +54,7 @@ if __name__ == "__main__":
                         default=128,
                         help="Multiplicative constant for the number of filters.")
     parser.add_argument("--tensorized",
-                        action="store_true"
+                        action="store_true",
                         help="Specify if you want the model to be tensorized in a TT")
     args = parser.parse_args()
     train(args)    

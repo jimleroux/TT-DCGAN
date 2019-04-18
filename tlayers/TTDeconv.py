@@ -10,13 +10,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class TTDeconv(torch.nn.Module):
-    def __init__(self, 
-                 conv_size,
-                 inp_ch_modes,              
-                 out_ch_modes,
-                 ranks,
-                 stride=1,
-                 padding=0):
+    def __init__(
+            self, 
+            conv_size,
+            inp_ch_modes,              
+            out_ch_modes,
+            ranks,
+            stride=1,
+            padding=0
+        ):
         """ tt-conv-layer (convolution of full input tensor with tt-filters (make tt full then use conv2d))
         Args:
         inp: input tensor, float - [batch_size, H, W, C]
@@ -43,16 +45,24 @@ class TTDeconv(torch.nn.Module):
         self.padding=padding
         
         # filter initialiased with glorot initialisation with the right parameter
-        self.filters = nn.Parameter(torch.nn.init.xavier_uniform_(torch.empty(1, ranks[0], conv_size[0], conv_size[1])))
+        self.filters = nn.Parameter(
+            torch.nn.init.xavier_uniform_(
+                torch.empty(1, ranks[0], conv_size[0], conv_size[1])
+            )
+        )
         self.d = len(inp_ch_modes)
         
         self.cores = nn.ParameterList()
         for i in range(self.d):
             # initialise each core with once again glorot initialisation with parameter matching the output and input channel mode (the c_i/s_i multiply to C/S)
-            self.cores.append(nn.Parameter(torch.nn.init.xavier_uniform_(torch.empty(out_ch_modes[i] * ranks[i + 1], ranks[i] * inp_ch_modes[i]))))
+            empty_core = torch.empty(
+                out_ch_modes[i] * ranks[i + 1], ranks[i] * inp_ch_modes[i]
+            )
+            empty_core = nn.Parameter(
+                torch.nn.init.xavier_uniform_(empty_core)
+            )
+            self.cores.append(empty_core)
             
-
-
     def forward(self, inp):
         
         # should we use clone to keep self.cores untouched? 
