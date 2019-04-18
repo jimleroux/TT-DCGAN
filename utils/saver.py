@@ -9,7 +9,7 @@ def save_models(D,G, train_hist, train_epoch):
     with open(PATH+'/train_hist.pkl', 'wb') as f:
         pickle.dump(train_hist, f)
 
-def save_gif(train_epoch):
+def save_gif(PATH, train_epoch):
     images = []
     for e in range(train_epoch):
         img_name = PATH+'/Fixed_results/MNIST_DCGAN_' + str(e + 1) + '.png'
