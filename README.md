@@ -11,4 +11,4 @@ After you can train the GAN model with:
 
 `python train_net.py --filtercst 64 --batch 64`
 
-You can monitor the training by looking at the images in `MNIST_DCGAN_results` folder which will be created during the training.
+You can monitor the training by looking at the images in `MNIST_DCGAN_results` folder which will be created during training.
