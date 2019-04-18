@@ -6,11 +6,12 @@ from autoencoder import Decoder
 
 class Generator(nn.Module):
     # initializers
-    def __init__(self, d=128, latentdim=100):
+    def __init__(self, d=128, latentdim=100, TT=False):
         super(Generator, self).__init__()
         self.latentdim = latentdim
         self.d = d
-        self.decoder = Decoder(d=d, latentdim=latentdim)
+        self.TT = TT
+        self.decoder = Decoder(d=d, latentdim=latentdim, TT=TT)
 
     # forward method
     def forward(self, inp):
