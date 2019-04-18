@@ -150,7 +150,7 @@ def train(args):
         save=True,
         path=PATH+'/MNIST_DCGAN_train_hist.png'
     )
-    save_gif(epochs)
+    save_gif(PATH, epochs)
 
 
 def main():
