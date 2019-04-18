@@ -2,41 +2,27 @@ import torch
 import torch.nn as nn
 
 from utils.initialization import normal_init
+from autoencoder import Encoder
 
+MODEL_DIR = "./MNIST_AE_results/"
 
 class Discriminator(nn.Module):
     # initializers
     def __init__(self, d=128, latentdim=100):
         super(Discriminator, self).__init__()
         self.latentdim = latentdim
-        self.layers = nn.Sequential(
-            nn.Conv2d(3, d, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(d),
-            nn.LeakyReLU(0.2),
-            nn.Conv2d(d, d*2, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(d*2),
-            nn.LeakyReLU(0.2),
-            nn.Conv2d(d*2, d*4, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(d*4),
-            nn.LeakyReLU(0.2),
-            nn.Conv2d(d*4, d*8, 4, 2, 1, bias=False),
-            nn.BatchNorm2d(d*8),
-            nn.ReLU(0.2),
-            nn.Conv2d(d*8, 1, 4, 1, 0, bias=False),
-            nn.Sigmoid()
-        )
-        self.weight_init(mean=0., std=0.02)
-
-    # weight_init
-    def weight_init(self, mean, std):
-        for m in self._modules:
-            normal_init(self._modules[m], mean, std)
+        self.encoder = Encoder(d=d, latentdim=latentdim)
+        self.linear = nn.Linear(latentdim, 1)
+        self.sigmoid = nn.Sigmoid()
 
     # forward method
     def forward(self, inp):
         # input = input.view(-1,28,28)
         # print (input.shape)
-        x = self.layers(inp)
+        x = self.encoder(inp)
+        x = x.view(-1, self.latentdim)
+        x = self.linear(x)
+        x = self.sigmoid(x)
         return x
     
     def train_step(self, x, generator, optimizer, criterion, device):

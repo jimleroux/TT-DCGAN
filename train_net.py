@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import torch
 import torch.nn as nn
@@ -10,8 +11,10 @@ from generator import Generator
 from utils.saver import save_gif, save_models
 from utils.showresults import show_result, show_train_hist
 
+MODEL_DIR = "./MNIST_AE_results/"
 
 def train(args):
+    pre_trained = args.pre_trained
     PATH = args.path_results
     lrD = args.lrD
     lrG = args.lrG
@@ -22,6 +25,14 @@ def train(args):
     device = args.device
     img_size = 64    
 
+    # Create directory for results
+    if not os.path.isdir(PATH):
+        os.mkdir(PATH)
+    if not os.path.isdir(PATH+'/Random_results'):
+        os.mkdir(PATH+'/Random_results')
+    if not os.path.isdir(PATH+'/Fixed_results'):
+        os.mkdir(PATH+'/Fixed_results')
+
     transform = transforms.Compose([
             transforms.Resize(img_size),
             transforms.ToTensor(),
@@ -30,10 +41,7 @@ def train(args):
 
     print("### Loading data ###")
     train_loader = torch.utils.data.DataLoader(
-        datasets.CIFAR10('data',
-        train=True,
-        download=True,
-        transform=transform),
+        datasets.CIFAR10('data', train=True, download=True, transform=transform),
         batch_size=batch_size,
         shuffle=True
     )
@@ -42,6 +50,9 @@ def train(args):
     print("### Create models ###")
     D = Discriminator(filter_cst, latent_dim).to(device)
     G = Generator(filter_cst, latent_dim).to(device)
+    if pre_trained:
+        D.encoder.load(MODEL_DIR)
+        G.decoder.load(MODEL_DIR)
     
     G_optimizer = optim.Adam(
         G.parameters(),
@@ -66,9 +77,9 @@ def train(args):
         G_losses = []
         i = 0
         for x, _ in train_loader:
-            i += 1
-            if i > 20:
-                break
+            # i += 1
+            # if i > 20:
+            #     break
             # x_ = torch.mean(x_, dim=1, keepdim=True)
             x = x.to(device)
             D_loss = D.train_step(
@@ -85,14 +96,7 @@ def train(args):
                 BCE_loss,
                 device
             )
-            G_loss = G.train_step(
-                D,
-                batch_size,
-                G_optimizer,
-                BCE_loss,
-                device
-            )
-            
+
             D_losses.append(D_loss)
             G_losses.append(G_loss)
         
@@ -138,15 +142,18 @@ def train(args):
     save_models(
         D,
         G,
-        train_hist
+        PATH,
+        train_hist,
+        epochs
     )
     show_train_hist(
         train_hist,
         save=True,
         path=PATH+'/MNIST_DCGAN_train_hist.png'
     )
-    save_gif()
-
+    save_gif(PATH, epochs)
+    
+    return D, G
 
 def main():
     parser = argparse.ArgumentParser(description="TDCGAN")
@@ -198,7 +205,11 @@ def main():
         default="cuda",
         help="Specify the computation device"
     )
-
+    parser.add_argument(
+        "--pre_trained",
+        action="store_true",
+        help="Specify the computation device"
+    )
     args = parser.parse_args()
     
     D, G = train(args)
