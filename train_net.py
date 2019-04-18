@@ -1,4 +1,5 @@
 import argparse
+import copy
 import os
 
 import torch
@@ -23,6 +24,7 @@ def train(args):
     latent_dim = args.latentdim
     filter_cst = args.filtercst
     device = args.device
+    save_every = args.save_every
     img_size = 64    
 
     # Create directory for results
@@ -73,6 +75,8 @@ def train(args):
     BCE_loss = nn.BCELoss()
     fixed_z_ = torch.randn((5 * 5, latent_dim)).to(device)    # fixed noise
     for epoch in range(epochs):
+        if epoch == 1 or epoch%save_every == 0:
+            D_test = copy.deepcopy(D)
         D_losses = []
         G_losses = []
         i = 0
@@ -90,7 +94,7 @@ def train(args):
                 device
             )
             G_loss = G.train_step(
-                D,
+                D_test,
                 batch_size,
                 G_optimizer,
                 BCE_loss,
@@ -209,6 +213,12 @@ def main():
         "--pre_trained",
         action="store_true",
         help="Specify the computation device"
+    )
+    parser.add_argument(
+        "--save_every",
+        type=int,
+        default=5,
+        help="Save discriminator every n epochs specified to compute loss."
     )
     args = parser.parse_args()
     
