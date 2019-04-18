@@ -11,9 +11,9 @@ def show_result(
         z_,
         num_epoch,
         device,
-        show = False,
-        save = False,
-        path = 'result.png',
+        show=False,
+        save=False,
+        path='result.png',
         isFix=False
     ):
     # fixed noise
@@ -47,9 +47,9 @@ def show_result(
 
 def show_train_hist(
         hist,
-        show = False,
-        save = False,
-        path = 'Train_hist.png'
+        show=False,
+        save=False,
+        path='Train_hist.png'
     ):
 
     x = range(len(hist['D_losses']))

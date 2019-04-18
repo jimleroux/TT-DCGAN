@@ -9,6 +9,7 @@ from utils.visualization import append_images
 
 MODEL_DIR = "./MNIST_AE_results/"
 
+
 class Encoder(nn.Module):
     def __init__(self, d=128, latentdim=100):
         super(Encoder, self).__init__()
@@ -36,6 +37,7 @@ class Encoder(nn.Module):
     def load(self, model_path: str):
         weight = torch.load(MODEL_DIR + "encoder_param.pkl")
         self.load_state_dict(weight)
+
 
 class Decoder(nn.Module):
     def __init__(self, d=128, latentdim=100):
@@ -66,6 +68,7 @@ class Decoder(nn.Module):
     def load(self, model_path: str):
         weight = torch.load(MODEL_DIR + "decoder_param.pkl")
         self.load_state_dict(weight)
+
 
 class Autoencoder(nn.Module):
     def __init__(self, device, d):

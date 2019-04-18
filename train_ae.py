@@ -23,10 +23,7 @@ def train(args):
     ])
     print("### Loading data ###")
     train_loader = torch.utils.data.DataLoader(
-        datasets.CIFAR10('data',
-        train=True,
-        download=True,
-        transform=transform),
+        datasets.CIFAR10('data', train=True, download=True, transform=transform),
         batch_size=batch_size,
         shuffle=True
     )

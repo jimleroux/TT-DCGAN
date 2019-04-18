@@ -32,10 +32,7 @@ def train(args):
 
     print("### Loading data ###")
     train_loader = torch.utils.data.DataLoader(
-        datasets.CIFAR10('data',
-        train=True,
-        download=True,
-        transform=transform),
+        datasets.CIFAR10('data', train=True, download=True, transform=transform),
         batch_size=batch_size,
         shuffle=True
     )
@@ -136,14 +133,15 @@ def train(args):
     save_models(
         D,
         G,
-        train_hist
+        train_hist,
+        epochs
     )
     show_train_hist(
         train_hist,
         save=True,
         path=PATH+'/MNIST_DCGAN_train_hist.png'
     )
-    save_gif()
+    save_gif(epochs)
 
 
 def main():
