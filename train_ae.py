@@ -15,6 +15,7 @@ def train(args):
     batch_size = args.batch_size
     filter_cst = args.filtercst
     img_size = 64
+    is_tensorized = args.tensorized
 
     transform = transforms.Compose([
             transforms.Resize(img_size),
@@ -29,7 +30,11 @@ def train(args):
     )
     print("### Loaded data ###")
 
-    model = Autoencoder(device=DEVICE, d=filter_cst)
+    model = Autoencoder(
+        device=DEVICE,
+        d=filter_cst,
+        TT=is_tensorized
+    )
     model.to(DEVICE)
     model.fit(train_loader, lr, num_epochs)
 
@@ -48,6 +53,9 @@ if __name__ == "__main__":
                         type=int,
                         default=128,
                         help="Multiplicative constant for the number of filters.")
+    parser.add_argument("--tensorized",
+                        action="store_true"
+                        help="Specify if you want the model to be tensorized in a TT")
     args = parser.parse_args()
     train(args)    
 

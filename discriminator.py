@@ -8,10 +8,10 @@ MODEL_DIR = "./MNIST_AE_results/"
 
 class Discriminator(nn.Module):
     # initializers
-    def __init__(self, d=128, latentdim=100):
+    def __init__(self, d=128, latentdim=100, TT=False):
         super(Discriminator, self).__init__()
         self.latentdim = latentdim
-        self.encoder = Encoder(d=d, latentdim=latentdim)
+        self.encoder = Encoder(d=d, latentdim=latentdim, TT=TT)
         self.linear = nn.Linear(latentdim, 1)
         self.sigmoid = nn.Sigmoid()
 

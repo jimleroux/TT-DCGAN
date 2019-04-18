@@ -23,7 +23,8 @@ def train(args):
     latent_dim = args.latentdim
     filter_cst = args.filtercst
     device = args.device
-    img_size = 64    
+    img_size = 64
+    is_tensorized = args.tensorized
 
     # Create directory for results
     if not os.path.isdir(PATH):
@@ -48,8 +49,8 @@ def train(args):
     print("### Loaded data ###")
 
     print("### Create models ###")
-    D = Discriminator(filter_cst, latent_dim).to(device)
-    G = Generator(filter_cst, latent_dim).to(device)
+    D = Discriminator(filter_cst, latent_dim, TT=is_tensorized).to(device)
+    G = Generator(filter_cst, latent_dim, TT=is_tensorized).to(device)
     if pre_trained:
         D.encoder.load(MODEL_DIR)
         G.decoder.load(MODEL_DIR)
@@ -209,6 +210,11 @@ def main():
         "--pre_trained",
         action="store_true",
         help="Specify the computation device"
+    )
+    parser.add_argument(
+        "--tensorized",
+        action="store_true",
+        help="Specify to tensorized the model in a TT format"
     )
     args = parser.parse_args()
     
