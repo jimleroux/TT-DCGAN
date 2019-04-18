@@ -41,8 +41,8 @@ def train(args):
     print("### Loaded data ###")
 
     print("### Create models ###")
-    D = Discriminator(filter_cst, latent_dim).to(device)
-    G = Generator(filter_cst, latent_dim).to(device)
+    D = Discriminator(filter_cst, latent_dim, TT=is_tensorized).to(device)
+    G = Generator(filter_cst, latent_dim, TT=is_tensorized).to(device)
     if pre_trained:
         D.encoder.load(MODEL_DIR)
         G.decoder.load(MODEL_DIR)
@@ -225,6 +225,11 @@ def main():
         type=str,
         default="cifar",
         help="Load dataset specified. mnist or cifar(default)."
+    )
+    parser.add_argument(
+        "--tensorized",
+        action="store_true",
+        help="Specify to tensorized the model in a TT format"
     )
     args = parser.parse_args()
     
