@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import torch
 import torch.nn as nn
@@ -23,6 +24,14 @@ def train(args):
     filter_cst = args.filtercst
     device = args.device
     img_size = 64    
+
+    # Create directory for results
+    if not os.path.isdir(PATH):
+        os.mkdir(PATH)
+    if not os.path.isdir(PATH+'/Random_results'):
+        os.mkdir(PATH+'/Random_results')
+    if not os.path.isdir(PATH+'/Fixed_results'):
+        os.mkdir(PATH+'/Fixed_results')
 
     transform = transforms.Compose([
             transforms.Resize(img_size),

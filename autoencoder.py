@@ -114,7 +114,7 @@ class Autoencoder(nn.Module):
         self.save(MODEL_DIR)
         print('Autoencoder trained.')
 
-    def save(self, model_path: str):
+    def save(self, model_path: str):    
         torch.save(self.encoder.state_dict(), model_path+"encoder_param.pkl")
         torch.save(self.decoder.state_dict(), model_path+"decoder_param.pkl")
 
@@ -132,6 +132,12 @@ class Autoencoder(nn.Module):
 
         sample = ToPILImage(mode='RGB')(sample.squeeze(0).cpu())
         recons = ToPILImage(mode='RGB')(recons.squeeze(0).cpu())
+
+        # Create directory for images
+        if not os.path.isdir("./images"):
+            os.mkdir("./images")
+        if not os.path.isdir("./images"+"/reconstructions"):
+            os.mkdir("./images"+"/reconstructions")
 
         combined = append_images([sample, recons])
         combined.save('./images/reconstructions/epoch{}.jpg'.format(epoch))
