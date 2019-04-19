@@ -62,8 +62,8 @@ class Encoder(nn.Module):
                     in_channels=d*8,
                     out_channels=self.latentdim,
                     kernel_size=4,
-                    stride=2,
-                    padding=1,
+                    stride=1,
+                    padding=0,
                     bias=False
                 )
             )    
