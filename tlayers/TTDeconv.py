@@ -83,7 +83,7 @@ class TTDeconv(torch.nn.Module):
         
         #tmp = tf.nn.conv2d(tmp, filters, [1] + strides + [1], padding)  
         #print(inp_ch)
-        tmp = F.conv_transpose2d(tmp, self.filters,bias=None, stride=self.stride, padding=self.padding)  #might need to look at the order of the stride
+        tmp = F.conv_transpose2d(tmp.contiguous(), self.filters,bias=None, stride=self.stride, padding=self.padding)  #might need to look at the order of the stride
         
         #tmp shape = [batch_size * inp_ch, h, w, r]
         #h, w = tmp.get_shape().as_list()[1:3]

@@ -46,7 +46,7 @@ class TTLin(torch.nn.Module):
         self.mat_cores = nn.ParameterList()
         for i in range(self.d):
             # initialise each core with once again glorot initialisation with parameter matching the output and input channel mode (the c_i/s_i multiply to C/S)
-            self.cores.append(nn.Parameter(torch.nn.init.xavier_uniform_(torch.empty(out_modes[i] * mat_ranks[i + 1], mat_ranks[i] * inp_modes[i]))))
+            self.mat_cores.append(nn.Parameter(torch.nn.init.xavier_uniform_(torch.empty(out_modes[i] * mat_ranks[i + 1], mat_ranks[i] * inp_modes[i]))))
         
         
         
@@ -56,23 +56,23 @@ class TTLin(torch.nn.Module):
         mat_cores = self.mat_cores
         
         #out = tf.reshape(inp, [-1, np.prod(inp_modes)])
-        out = torch.reshape(inp, (-1, np.prod(inp_modes)))
+        out = torch.reshape(inp, (-1, np.prod(self.inp_modes)))
         #out = tf.transpose(out, [1, 0])
         out = torch.transpose(out, 1, 0)
+        print(out.shape)
         
         for i in range(self.d):
             #out = tf.reshape(out, [mat_ranks[i] * inp_modes[i], -1])
-            out = torch.reshape(out, (mat_ranks[i] * inp_modes[i], -1))
+            out = torch.reshape(out, (self.mat_ranks[i] * self.inp_modes[i], -1))
                          
             #out = tf.matmul(mat_cores[i], out)
             out = torch.mm(mat_cores[i], out)
             #out = tf.reshape(out, [out_modes[i], -1])
-            out = torch.reshape(out, (out_modes[i], -1))
+            out = torch.reshape(out, (self.out_modes[i], -1))
             #out = tf.transpose(out, [1, 0])
             out = torch.transpose(out, 1, 0)
         
         
         #out = tf.reshape(out, [-1, np.prod(out_modes)], name="out")
-        out = torch.reshape(out, (-1, np.prod(out_modes)))
-        
+        out = torch.reshape(out, (-1, np.prod(self.out_modes)))
         return out

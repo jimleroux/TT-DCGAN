@@ -9,6 +9,7 @@ from tlayers.TTConv import TTConv
 from tlayers.TTDeconv import TTDeconv
 
 from utils.showresults import show_recons
+import time
 
 MODEL_DIR = "./MNIST_AE_results/"
 
@@ -20,7 +21,7 @@ class Encoder(nn.Module):
         if TT == False:
             self.layers = nn.Sequential(
                 nn.Conv2d(
-                    in_channels=3,
+                    in_channels=1,
                     out_channels=d,
                     kernel_size=4,
                     stride=2,
@@ -57,7 +58,7 @@ class Encoder(nn.Module):
                     bias=False
                 ),
                 nn.BatchNorm2d(d*8),
-                nn.ReLU(0.2),
+                nn.LeakyReLU(0.2),
                 nn.Conv2d(
                     in_channels=d*8,
                     out_channels=self.latentdim,
@@ -81,9 +82,19 @@ class Encoder(nn.Module):
                 nn.LeakyReLU(0.2),
                 TTConv(
                     conv_size=[4,4],
-                    inp_ch_modes=[4,2,2,1],
-                    out_ch_modes=[4,4,2,1],
-                    ranks=[8,4,4,4,1],
+                    inp_ch_modes=[4,4,4],
+                    out_ch_modes=[4,4,4],
+                    ranks=[20,20,20,1],
+                    stride=2,
+                    padding=1
+                ),
+                nn.BatchNorm2d(d),
+                nn.LeakyReLU(0.2),
+                TTConv(
+                    conv_size=[4,4],
+                    inp_ch_modes=[4,4,4],
+                    out_ch_modes=[4,8,4],
+                    ranks=[20,20,20,1],
                     stride=2,
                     padding=1
                 ),
@@ -91,37 +102,35 @@ class Encoder(nn.Module):
                 nn.LeakyReLU(0.2),
                 TTConv(
                     conv_size=[4,4],
-                    inp_ch_modes=[4,4,2,1],
-                    out_ch_modes=[4,4,4,1],
-                    ranks=[8,4,4,4,1],
+                    inp_ch_modes=[4,8,4],
+                    out_ch_modes=[4,8,4],
+                    ranks=[20,20,20,1],
                     stride=2,
                     padding=1
                 ),
-                nn.BatchNorm2d(d*4),
+                nn.BatchNorm2d(d*2),
                 nn.LeakyReLU(0.2),
                 TTConv(
                     conv_size=[4,4],
-                    inp_ch_modes=[4,4,4,1],
-                    out_ch_modes=[4,4,4,2],
-                    ranks=[8,4,4,4,1],
-                    stride=2,
-                    padding=1
-                ),
-                nn.BatchNorm2d(d*8),
-                nn.ReLU(0.2),
-                TTConv(
-                    conv_size=[4,4],
-                    inp_ch_modes=[4,4,4,2],
-                    out_ch_modes=[5,5,2,2],
-                    ranks=[8,4,4,4,1],
+                    inp_ch_modes=[4,8,4],
+                    out_ch_modes=[5,4,5],
+                    ranks=[20,20,20,1],
                     stride=1,
                     padding=0
                 )
             )
 
     def forward(self, inp):
-        output = self.layers(inp)
-        return output
+        # output = self.layers(inp)
+        out = inp
+        for i, l in enumerate(self.layers):
+            if isinstance(l, (TTConv, nn.Conv2d)):
+                t1 = time.time()*1000
+            out = l(out)
+            # if isinstance(l, (TTConv, nn.Conv2d)):
+                # print("Conv Layer {}, time:{}".format(i, time.time()*1000-t1))
+        # return output
+        return out
 
     def load(self, model_path: str):
         weight = torch.load(MODEL_DIR + "encoder_param.pkl")
@@ -144,7 +153,7 @@ class Decoder(nn.Module):
                     bias=False
                 ),
                 nn.BatchNorm2d(d*8),
-                nn.LeakyReLU(0.2),
+                nn.ReLU(),
                 nn.ConvTranspose2d(
                     in_channels=d*8,
                     out_channels=d*4,
@@ -154,7 +163,7 @@ class Decoder(nn.Module):
                     bias=False
                 ),
                 nn.BatchNorm2d(d*4),
-                nn.LeakyReLU(0.2),
+                nn.ReLU(),
                 nn.ConvTranspose2d(
                     in_channels=d*4,
                     out_channels=d*2,
@@ -164,7 +173,7 @@ class Decoder(nn.Module):
                     bias=False
                 ),
                 nn.BatchNorm2d(d*2),
-                nn.LeakyReLU(0.2),
+                nn.ReLU(),
                 nn.ConvTranspose2d(
                     in_channels=d*2,
                     out_channels=d,
@@ -174,10 +183,10 @@ class Decoder(nn.Module):
                     bias=False
                 ),
                 nn.BatchNorm2d(d),
-                nn.LeakyReLU(0.2),
+                nn.ReLU(),
                 nn.ConvTranspose2d(
                     in_channels=d,
-                    out_channels=3,
+                    out_channels=1,
                     kernel_size=4,
                     stride=2,
                     padding=1,
@@ -189,39 +198,39 @@ class Decoder(nn.Module):
             self.layers = nn.Sequential(
                 TTDeconv(
                     conv_size=[4,4],
-                    inp_ch_modes=[5,5,2,2],
-                    out_ch_modes=[4,4,4,2],
-                    ranks=[8,4,4,4,1],
+                    inp_ch_modes=[5,4,5],
+                    out_ch_modes=[4,8,4],
+                    ranks=[20,20,20,1],
                     stride=1,
                     padding=0
                 ),
-                nn.BatchNorm2d(d*8),
-                nn.LeakyReLU(0.2),
+                nn.BatchNorm2d(d*2),
+                nn.ReLU(),
                 TTDeconv(
                     conv_size=[4,4],
-                    inp_ch_modes=[4,4,4,2],
-                    out_ch_modes=[4,4,4,1],
-                    ranks=[8,4,4,4,1],
-                    stride=2,
-                    padding=1
-                ),
-                nn.BatchNorm2d(d*4),
-                nn.LeakyReLU(0.2),
-                TTDeconv(
-                    conv_size=[4,4],
-                    inp_ch_modes=[4,4,4,1],
-                    out_ch_modes=[4,4,2,1],
-                    ranks=[8,4,4,4,1],
+                    inp_ch_modes=[4,8,4],
+                    out_ch_modes=[4,8,4],
+                    ranks=[20,20,20,1],
                     stride=2,
                     padding=1
                 ),
                 nn.BatchNorm2d(d*2),
-                nn.LeakyReLU(0.2),
+                nn.ReLU(),
                 TTDeconv(
                     conv_size=[4,4],
-                    inp_ch_modes=[4,4,2,1],
-                    out_ch_modes=[4,2,2,1],
-                    ranks=[8,4,4,4,1],
+                    inp_ch_modes=[4,8,4],
+                    out_ch_modes=[4,4,4],
+                    ranks=[20,20,20,1],
+                    stride=2,
+                    padding=1
+                ),
+                nn.BatchNorm2d(d),
+                nn.ReLU(),
+                TTDeconv(
+                    conv_size=[4,4],
+                    inp_ch_modes=[4,4,4],
+                    out_ch_modes=[4,4,4],
+                    ranks=[20,20,20,1],
                     stride=2,
                     padding=1
                 ),                
@@ -234,7 +243,7 @@ class Decoder(nn.Module):
                 #     bias=False
                 # ),
                 nn.BatchNorm2d(d),
-                nn.LeakyReLU(0.2),
+                nn.ReLU(),
                 # TTDeconv(
                 #     conv_size=[4,4],
                 #     inp_ch_modes=[4,2,2,2],
@@ -254,8 +263,16 @@ class Decoder(nn.Module):
                 nn.Tanh()
             )
     def forward(self, inp):
-        output = self.layers(inp)
-        return output
+        # output = self.layers(inp)
+        out = inp
+        for i, l in enumerate(self.layers):
+            if isinstance(l, (TTDeconv, nn.ConvTranspose2d)):
+                t1 = time.time()*1000
+            out = l(out)
+            # if isinstance(l, (TTDeconv, nn.ConvTranspose2d)):
+                # print("DeConv Layer {}, time:{}".format(i, time.time()*1000-t1))
+        # return output
+        return out
 
     def load(self, model_path: str):
         weight = torch.load(MODEL_DIR + "decoder_param.pkl")
@@ -285,9 +302,13 @@ class Autoencoder(nn.Module):
             train_loss = 0
             for inputs, _ in trainloader:
                 inputs = inputs.to(self.device)
+                t1 = time.time()*1000
                 recons = self.forward(inputs)
+                # print("Forward time: {}".format(time.time()*1000-t1))
                 loss = self.mse(recons, inputs)
+                t1 = time.time()*1000
                 loss.backward()
+                # print("Backward time: {}".format(time.time()*1000-t1))
                 _optimizer.step()
                 _optimizer.zero_grad()
                 train_loss += loss.data.cpu().numpy() * inputs.shape[0]

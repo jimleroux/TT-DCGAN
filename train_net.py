@@ -74,8 +74,8 @@ def train(args):
     BCE_loss = nn.BCELoss()
     fixed_z_ = torch.randn((5 * 5, latent_dim)).to(device)    # fixed noise
     for epoch in range(epochs):
-        if epoch == 1 or epoch%save_every == 0:
-            D_test = copy.deepcopy(D)
+        # if epoch == 1 or epoch%save_every == 0:
+        #     D_test = copy.deepcopy(D)
         D_losses = []
         G_losses = []
         G_fix_losses = []
@@ -88,7 +88,6 @@ def train(args):
                 BCE_loss,
                 device
             )
-
             G_loss = G.train_step(
                 D,
                 batch_size,
@@ -96,17 +95,16 @@ def train(args):
                 BCE_loss,
                 device
             )
-
-            G_fix_loss = G.evaluate(
-                D_test,
-                batch_size,
-                BCE_loss,
-                device
-            )
+            # G_fix_loss = G.evaluate(
+            #     D_test,
+            #     batch_size,
+            #     BCE_loss,
+            #     device
+            # )
 
             D_losses.append(D_loss)
             G_losses.append(G_loss)
-            G_fix_losses.append(G_fix_loss)
+            # G_fix_losses.append(G_fix_loss)
         
         meanDloss = torch.mean(torch.FloatTensor(D_losses))
         meanGloss = torch.mean(torch.FloatTensor(G_losses))
