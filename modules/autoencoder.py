@@ -124,7 +124,9 @@ class Autoencoder(nn.Module):
         # Create directory for images
         if not os.path.isdir("./images"):
             os.mkdir("./images")
-        if not os.path.isdir("./images"+"/reconstructions"):
-            os.mkdir("./images"+"/reconstructions")
-
-        show_recons(images, epoch, num_samp, "./images/reconstructions/epoch{}.jpg".format(epoch))
+        if not os.path.isdir("./images/reconstructions"):
+            os.mkdir("./images/reconstructions")
+        if not os.path.isdir("./images/reconstructions/config_{}".format(self.id)):
+            os.mkdir("./images/reconstructions/config_{}".format(self.id))
+        image_path = "./images/reconstructions/config_{}/".format(self.id)
+        show_recons(images, epoch, num_samp, image_path + "epoch{}.jpg".format(epoch))
