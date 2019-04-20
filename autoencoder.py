@@ -11,7 +11,7 @@ from tlayers.TTDeconv import TTDeconv
 from utils.showresults import show_recons
 import time
 
-MODEL_DIR = "./MNIST_AE_results/"
+MODEL_DIR = "./models/AE/"
 
 
 class Encoder(nn.Module):
