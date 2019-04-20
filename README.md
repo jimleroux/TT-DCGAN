@@ -5,7 +5,7 @@ Project in collaboration with [NBerty](https://github.com/NBerty) and [tobicarva
 git clone https://github.com/jimleroux/tensor_factorization.git
 ```
 
-To train the vanilla GAN, start by pretraining the weights with an autoencoder use:    
+To train the GAN, start by pretraining the weights with an autoencoder use:    
 
 ```bash
 python train_ae.py --add_the_config_file_you_want.json
