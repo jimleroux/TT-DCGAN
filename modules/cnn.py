@@ -39,7 +39,7 @@ class Encoder(nn.Module):
         return output
 
     def load(self):
-        model_path = MODEL_DIR + "{}/encoder_param.pkl".format(self.id)
+        model_path = MODEL_DIR + "config_{}/encoder_param.pkl".format(self.id)
         weight = torch.load(model_path)
         self.load_state_dict(weight)
 
@@ -78,6 +78,6 @@ class Decoder(nn.Module):
         return output
 
     def load(self):
-        model_path = MODEL_DIR + "{}/decoder_param.pkl".format(self.id)
+        model_path = MODEL_DIR + "config_{}/decoder_param.pkl".format(self.id)
         weight = torch.load(model_path)
         self.load_state_dict(weight)
