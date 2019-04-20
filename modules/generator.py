@@ -2,28 +2,25 @@ import torch
 import torch.nn as nn
 
 from utils.initialization import normal_init
-from autoencoder import Decoder
+from modules.cnn import Decoder
 
 class Generator(nn.Module):
     # initializers
-    def __init__(self, d=128, latentdim=100, TT=False):
+    def __init__(self, config):
         super(Generator, self).__init__()
-        self.latentdim = latentdim
-        self.d = d
-        self.TT = TT
-        self.decoder = Decoder(d=d, latentdim=latentdim, TT=TT)
+        self.decoder = Decoder(config)
 
     # forward method
     def forward(self, inp):
         # x = F.relu(self.deconv1(input))
-        x = inp.view(-1,self.latentdim,1,1)
+        x = inp.view(-1,100,1,1)
         x = self.decoder(x)
         return x
 
     def train_step(self, discriminator, mini_batch_size, optimizer, criterion, device):
         self.zero_grad()
         # Generate z with random values
-        z = torch.randn((mini_batch_size, self.latentdim)).to(device)
+        z = torch.randn((mini_batch_size, 100)).to(device)
         y = torch.ones(mini_batch_size).to(device)     # Attempting to be real
 
         # Calculate loss for generator
@@ -41,7 +38,7 @@ class Generator(nn.Module):
         self.eval()
         with torch.no_grad():
             # Generate z with random values
-            z = torch.randn((mini_batch_size, self.latentdim)).to(device)
+            z = torch.randn((mini_batch_size, 100)).to(device)
             y = torch.ones(mini_batch_size).to(device)     # Attempting to be real
 
             # Calculate loss for generator

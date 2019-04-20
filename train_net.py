@@ -3,18 +3,19 @@ import copy
 import os
 
 import numpy as np
+import json
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
 
-from dataloader import load_dataset
-from discriminator import Discriminator
-from generator import Generator
+from utils.dataloader import load_dataset
+from modules.discriminator import Discriminator
+from modules.generator import Generator
 from utils.saver import save_gif, save_models
 from utils.showresults import show_result, show_train_hist
 
-MODEL_DIR = "./MNIST_AE_results/"
+CONFIG_DIR = "./configs/"
 
 def train(args):
     pre_trained = args.pre_trained
@@ -23,12 +24,11 @@ def train(args):
     lrG = args.lrG
     epochs = args.epochs
     batch_size = args.batch
-    latent_dim = args.latentdim
-    filter_cst = args.filtercst
     device = args.device
     save_every = args.save_every
     data = args.data
-    is_tensorized = args.tensorized 
+    config = json.load(open(CONFIG_DIR + args.config, 'r'))
+    TT = args.fc_tensorized
 
     # Create directory for results
     if not os.path.isdir(PATH):
@@ -43,16 +43,16 @@ def train(args):
     print("### Loaded data ###")
 
     print("### Create models ###")
-    D = Discriminator(filter_cst, latent_dim, TT=is_tensorized).to(device)
-    G = Generator(filter_cst, latent_dim, TT=is_tensorized).to(device)
+    D = Discriminator(config, TT).to(device)
+    G = Generator(config).to(device)
     model_parameters = filter(lambda p: p.requires_grad, D.parameters())
     params = sum([np.prod(p.size()) for p in model_parameters])
     model_parameters = filter(lambda p: p.requires_grad, G.parameters())
     params += sum([np.prod(p.size()) for p in model_parameters])
     print("The model has:{} parameters".format(params))
     if pre_trained:
-        D.encoder.load(MODEL_DIR)
-        G.decoder.load(MODEL_DIR)
+        D.encoder.load()
+        G.decoder.load()
     
     G_optimizer = optim.Adam(
         G.parameters(),
@@ -72,7 +72,7 @@ def train(args):
     }
     
     BCE_loss = nn.BCELoss()
-    fixed_z_ = torch.randn((5 * 5, latent_dim)).to(device)    # fixed noise
+    fixed_z_ = torch.randn((5 * 5, 100)).to(device)    # fixed noise
     for epoch in range(epochs):
         if epoch == 1 or epoch%save_every == 0:
             D_test = copy.deepcopy(D)
@@ -123,10 +123,10 @@ def train(args):
         )
         p = PATH+'/Random_results/MNIST_DCGAN_' + str(epoch + 1) + '.png'
         fixed_p = PATH+'/Fixed_results/MNIST_DCGAN_' + str(epoch + 1) + '.png'
-        z_ = torch.randn((5*5, latent_dim)).to(device)
+        z_ = torch.randn((5*5, 100)).to(device)
         show_result(
             G,
-            latent_dim,
+            100,
             fixed_z_,
             z_,
             device,
@@ -137,7 +137,7 @@ def train(args):
         )
         show_result(
             G,
-            latent_dim,
+            100,
             fixed_z_,
             z_,
             device,
@@ -167,6 +167,12 @@ def train(args):
 def main():
     parser = argparse.ArgumentParser(description="TDCGAN")
     parser.add_argument(
+        '--config',
+        type=str,
+        default="MNIST/all_TT.json",
+        help="Path to config file, all_TT.json as default."
+    )
+    parser.add_argument(
         "--lrD",
         type=float,
         default=0.002,
@@ -189,18 +195,6 @@ def main():
         type=int,
         default=128,
         help="Batch size"
-    )
-    parser.add_argument(
-        "--latentdim",
-        type=int,
-        default=100,
-        help="Size of the latent dimension"
-    )
-    parser.add_argument(
-        "--filtercst",
-        type=int,
-        default=128,
-        help="Multiplicative constant for the number of filters at each layers"
     )
     parser.add_argument(
         "--path_results",
@@ -228,13 +222,13 @@ def main():
     parser.add_argument(
         "--data",
         type=str,
-        default="cifar",
+        default="mnist",
         help="Load dataset specified. mnist or cifar(default)."
     )
     parser.add_argument(
-        "--tensorized",
+        "--fc_tensorized",
         action="store_true",
-        help="Specify to tensorized the model in a TT format"
+        help="Specify to have the last FC in TT format."
     )
     args = parser.parse_args()
     
