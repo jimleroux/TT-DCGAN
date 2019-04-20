@@ -12,14 +12,19 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def train(args):
     lr = args.lr
-    num_epochs = args.num_epochs
-    batch_size = args.batch_size
+    epochs = args.epochs
+    batch = args.batch
     filter_cst = args.filtercst
     is_tensorized = args.tensorized
     data = args.data
+    validation = args.validation
 
     print("### Loading data ###")
-    train_loader = load_dataset(data, batch_size)
+    train_loader = load_dataset(data, batch, is_train=True)
+    if validation:
+        valid_loader = load_dataset(data, batch, is_train=not(validation))
+    else:
+        valid_loader = None
     print("### Loaded data ###")
 
     model = Autoencoder(
@@ -28,7 +33,7 @@ def train(args):
         TT=is_tensorized
     )
     model.to(DEVICE)
-    model.fit(train_loader, lr, num_epochs)
+    model.fit(train_loader, lr, epochs, validloader=valid_loader)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -50,8 +55,11 @@ if __name__ == "__main__":
                         help="Specify if you want the model to be tensorized in a TT")
     parser.add_argument('--data',
                         type=str,
-                        default="cifar"
+                        default="cifar",
                         help="Load dataset specified. mnist or cifar(default).")
+    parser.add_argument("--validation",
+                        action="store_true",
+                        help="Specify if you want to use validation set.")
     args = parser.parse_args()
     train(args)    
 
