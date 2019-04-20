@@ -52,7 +52,7 @@ def show_result(
         ax[i, j].cla() 
         im = np.transpose(test_images[k,:].cpu().data.view(-1,64,64).numpy(), (1,2,0))
         im = torch.from_numpy(im).squeeze().data.numpy()
-        ax[i, j].imshow(im/2+0.5)
+        ax[i, j].imshow(im/2+0.5, cmap="gray")
     label = 'Epoch {0}'.format(num_epoch)
     fig.text(0.5, 0.04, label, ha='center')
     print ("Saved to :",path)

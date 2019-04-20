@@ -59,7 +59,6 @@ class TTLin(torch.nn.Module):
         out = torch.reshape(inp, (-1, np.prod(self.inp_modes)))
         #out = tf.transpose(out, [1, 0])
         out = torch.transpose(out, 1, 0)
-        print(out.shape)
         
         for i in range(self.d):
             #out = tf.reshape(out, [mat_ranks[i] * inp_modes[i], -1])

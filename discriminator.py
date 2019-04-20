@@ -15,16 +15,20 @@ class Discriminator(nn.Module):
         self.latentdim = latentdim
         self.TT = TT
         self.encoder = Encoder(d=d, latentdim=latentdim, TT=TT)
-        # if self.TT:
-        #     self.linear = TTLin(inp_modes=np.array([5,5,2,2]), out_modes=np.array([1,1,1,1]), mat_ranks=np.array([8,4,4,4,1]))
-        # else:
-        self.linear = nn.Linear(latentdim, 1)
+        if self.TT:
+            self.linear = TTLin(
+                inp_modes=np.array([5,4,5]),
+                out_modes=np.array([1,1,1]),
+                mat_ranks=np.array([1,8,8,1])
+            )
+        else:
+            self.linear = nn.Linear(latentdim, 1)
         self.sigmoid = nn.Sigmoid()
 
     # forward method
     def forward(self, inp):
         # input = input.view(-1,28,28)
-        # print (input.shape)
+        # print (input.shape)s
         x = self.encoder(inp)
         x = x.view(-1, self.latentdim)
         x = self.linear(x)

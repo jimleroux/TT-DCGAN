@@ -74,8 +74,8 @@ def train(args):
     BCE_loss = nn.BCELoss()
     fixed_z_ = torch.randn((5 * 5, latent_dim)).to(device)    # fixed noise
     for epoch in range(epochs):
-        # if epoch == 1 or epoch%save_every == 0:
-        #     D_test = copy.deepcopy(D)
+        if epoch == 1 or epoch%save_every == 0:
+            D_test = copy.deepcopy(D)
         D_losses = []
         G_losses = []
         G_fix_losses = []

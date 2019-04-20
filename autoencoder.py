@@ -227,14 +227,14 @@ class Decoder(nn.Module):
                 #     padding=1
                 # ),                
                 nn.ConvTranspose2d(
-                    in_channels=d*2,
+                    in_channels=d,
                     out_channels=d,
                     kernel_size=4,
                     stride=2,
                     padding=1,
                     bias=False
                 ),
-                nn.BatchNorm2d(d*2),
+                nn.BatchNorm2d(d),
                 nn.ReLU(),
                 # TTDeconv(
                 #     conv_size=[4,4],
@@ -256,7 +256,7 @@ class Decoder(nn.Module):
             )
     def forward(self, inp):
         output = self.layers(inp)
-        return out
+        return output
 
     def load(self, model_path: str):
         weight = torch.load(MODEL_DIR + "decoder_param.pkl")
