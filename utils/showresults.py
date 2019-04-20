@@ -112,4 +112,5 @@ def show_loss(
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
     plt.savefig(path)
-    plt.show()
+    if show:
+        plt.show()

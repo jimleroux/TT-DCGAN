@@ -11,7 +11,7 @@ from tlayers.TTDeconv import TTDeconv
 from utils.showresults import show_recons, show_loss
 import time
 
-MODEL_DIR = "./models/AE/"
+MODEL_DIR = "./models/"
 
 
 class Encoder(nn.Module):
@@ -338,8 +338,10 @@ class Autoencoder(nn.Module):
     def save(self, model_path: str):
         if not os.path.isdir(model_path):
             os.mkdir(model_path)
-        torch.save(self.encoder.state_dict(), model_path+"encoder_param.pkl")
-        torch.save(self.decoder.state_dict(), model_path+"decoder_param.pkl")
+        if not os.path.isdir(model_path + "/AE"):
+            os.mkdir(model_path + "/AE")
+        torch.save(self.encoder.state_dict(), model_path+"/encoder_param.pkl")
+        torch.save(self.decoder.state_dict(), model_path+"/decoder_param.pkl")
 
     def _get_time(self, starting_time, current_time):
         total_time = current_time - starting_time
