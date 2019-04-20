@@ -1,3 +1,4 @@
+import json
 import os
 import time
 
@@ -5,8 +6,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from modules.cnn import Encoder, Decoder
-from utils.showresults import show_recons, show_loss
+from modules.cnn import Decoder, Encoder
+from utils.showresults import show_loss, show_recons
 
 MODEL_DIR = "./models/"
 
@@ -14,6 +15,7 @@ class Autoencoder(nn.Module):
     def __init__(self, device, config):
         super(Autoencoder, self).__init__()
         self.id = config["id"]
+        self.config = config
         self.encoder = Encoder(config)
         self.decoder = Decoder(config)
         self.mse = nn.MSELoss()
@@ -77,11 +79,16 @@ class Autoencoder(nn.Module):
         if validloader is not None:
             show_loss(valid_losses)
 
+        losses = {
+            "train_losses": train_losses,
+            "valid_losses": valid_losses
+        }
+
         print("Saving model...")
-        self.save(MODEL_DIR)
+        self.save(MODEL_DIR, losses)
         print('Autoencoder trained.')
 
-    def save(self, model_path: str):
+    def save(self, model_path: str, losses: dict):
         if not os.path.isdir(model_path):
             os.mkdir(model_path)
         if not os.path.isdir(model_path + "AE"):
@@ -91,6 +98,8 @@ class Autoencoder(nn.Module):
         model_path = model_path + "AE/config_{}/".format(self.id)
         torch.save(self.encoder.state_dict(), model_path+"encoder_param.pkl")
         torch.save(self.decoder.state_dict(), model_path+"decoder_param.pkl")
+        with open(model_path + "output.json", "w") as f:
+            json.dump(losses, f)  
 
     def _get_time(self, starting_time, current_time):
         total_time = current_time - starting_time
@@ -119,5 +128,3 @@ class Autoencoder(nn.Module):
             os.mkdir("./images"+"/reconstructions")
 
         show_recons(images, epoch, num_samp, "./images/reconstructions/epoch{}.jpg".format(epoch))
-
-

@@ -1,6 +1,6 @@
 {
 	"type": "ae",
-	"id": "tt_conv_only",
+	"id": "full_tt",
 	"training": {
 		"epochs": 20,
 		"batch_size": 64,
