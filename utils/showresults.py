@@ -114,3 +114,5 @@ def show_loss(
     plt.savefig(path)
     if show:
         plt.show()
+    else:
+        plt.close()

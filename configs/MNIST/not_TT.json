@@ -1,0 +1,178 @@
+{
+	"type": "ae",
+	"id": "not_TT",
+	"training": {
+		"epochs": 20,
+		"batch_size": 64,
+		"lr": 0.003
+    },
+    
+	"encoder": [
+        {
+            "type": "conv",
+            "param": {
+                "in_channels": 1,
+                "out_channels": 64,
+                "kernel_size": 4,
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 64}
+        },
+        {
+            "type": "leaky_relu",
+            "param": {"negative_slope": 0.2}
+        },
+        {
+            "type": "conv",
+            "param": {
+                "in_channels": 64,
+                "out_channels": 64,
+                "kernel_size": 4,
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 64}
+        },
+        {
+            "type": "leaky_relu",
+            "param": {"negative_slope": 0.2}
+        },
+        {
+            "type": "conv",
+            "param": {
+                "in_channels": 64,
+                "out_channels": 128,
+                "kernel_size": 4,
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 128}
+        },
+        {
+            "type": "leaky_relu",
+            "param": {"negative_slope": 0.2}
+        },
+        {
+            "type": "conv",
+            "param": {
+                "in_channels": 128,
+                "out_channels": 128,
+                "kernel_size": 4,
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 128}
+        },
+        {
+            "type": "leaky_relu",
+            "param": {"negative_slope": 0.2}
+        },
+        {
+            "type": "conv",
+            "param": {
+                "in_channels": 128,
+                "out_channels": 100,
+                "kernel_size": 4,
+                "stride": 1,
+                "padding": 0}
+        }
+    ],
+
+    "decoder": [
+        {
+            "type": "deconv",
+            "param": {
+                "in_channels": 100,
+                "out_channels": 128,
+                "kernel_size": 4,
+                "stride": 1,
+                "padding": 0,
+                "bias": false}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 128}
+        },
+        {
+            "type": "relu",
+            "param": {}
+        },
+        {
+            "type": "deconv",
+            "param": {
+                "in_channels": 128,
+                "out_channels": 128,
+                "kernel_size": 4,
+                "stride": 2,
+                "padding": 1,
+                "bias": false}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 128}
+        },
+        {
+            "type": "relu",
+            "param": {}
+        },
+        {
+            "type": "deconv",
+            "param": {
+                "in_channels": 128,
+                "out_channels": 64,
+                "kernel_size": 4,
+                "stride": 2,
+                "padding": 1,
+                "bias": false}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 64}
+        },
+        {
+            "type": "relu",
+            "param": {}
+        },
+        {
+            "type": "deconv",
+            "param": {
+                "in_channels": 64,
+                "out_channels": 64,
+                "kernel_size": 4,
+                "stride": 2,
+                "padding": 1,
+                "bias": false}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 64}
+        },
+        {
+            "type": "relu",
+            "param": {}
+        },
+        {
+            "type": "deconv",
+            "param": {
+                "in_channels": 64,
+                "out_channels": 1,
+                "kernel_size": 4,
+                "stride": 2,
+                "padding": 1,
+                "bias": false}
+        },
+        {
+            "type": "tanh",
+            "param": {}
+        }
+    ]
+}
