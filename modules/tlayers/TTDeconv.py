@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class TTConv(torch.nn.Module):
+class TTDeconv(torch.nn.Module):
     def __init__(
             self, 
             conv_size,
@@ -36,7 +36,7 @@ class TTConv(torch.nn.Module):
         In the constructor we instantiate two nn.Linear modules and assign them as
         member variables.
         """
-        super(TTConv, self).__init__()
+        super(TTDeconv, self).__init__()
         
         self.inp_ch_modes=inp_ch_modes
         self.out_ch_modes=out_ch_modes
@@ -47,7 +47,7 @@ class TTConv(torch.nn.Module):
         # filter initialiased with glorot initialisation with the right parameter
         self.filters = nn.Parameter(
             torch.nn.init.xavier_uniform_(
-                torch.empty(ranks[0], 1, conv_size[0], conv_size[1])
+                torch.empty(1, ranks[0], conv_size[0], conv_size[1])
             )
         )
         self.d = len(inp_ch_modes)
@@ -78,20 +78,16 @@ class TTConv(torch.nn.Module):
         
         #tmp = tf.reshape(tmp, [-1, inp_h, inp_w, 1]) 
         #tmp = torch.reshape(tmp, (-1, inp_h, inp_w, 1)) # why not using inp_h and inp_w as first and second entry?
+        #tmp = torch.transpose(tmp, 1,0) # test
         tmp = torch.reshape(tmp, (-1, 1, inp_h, inp_w)) # we want h and w at last entry
         
         #tmp = tf.nn.conv2d(tmp, filters, [1] + strides + [1], padding)  
-        tmp = F.conv2d(
-            tmp,
-            self.filters,
-            bias=None,
-            stride=self.stride,
-            padding=self.padding
-        )  #might need to look at the order of the stride
+        #print(inp_ch)
+        tmp = F.conv_transpose2d(tmp.contiguous(), self.filters,bias=None, stride=self.stride, padding=self.padding)  #might need to look at the order of the stride
         
         #tmp shape = [batch_size * inp_ch, h, w, r]
         #h, w = tmp.get_shape().as_list()[1:3]
-        #tmp shape = [batch_size * inp_ch, r, h, w]
+        #tmp shape = [batch_size * inp_ch, r, h, w] 64*64*16*128*1024
         h, w = list(tmp.shape)[2:4]
         
         # lets use their notation for simplicity
@@ -104,6 +100,7 @@ class TTConv(torch.nn.Module):
         tmp = torch.transpose(tmp, 2, 3) #[4,1,0,2,3]
         #tmp shape = [r, c, b, h, w]
         
+        
         for i in range(self.d):            
             #tmp = tf.reshape(tmp, [ranks[i] * inp_ch_modes[i], -1])
             tmp = torch.reshape(tmp, (self.ranks[i] * self.inp_ch_modes[i], -1))
@@ -115,9 +112,11 @@ class TTConv(torch.nn.Module):
             tmp = torch.transpose(tmp, 1, 0)
         
         out_ch = np.prod(self.out_ch_modes)
+        #print(out_ch, self.out_ch_modes)
         
         #out = tf.reshape(tmp, [-1, h, w, out_ch], name='out')
         out = torch.reshape(tmp, (-1, out_ch, h, w))
         #out shape is [batch_size, out_ch, h, w]
+        
         
         return out

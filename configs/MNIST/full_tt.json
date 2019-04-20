@@ -1,0 +1,183 @@
+{
+	"type": "ae",
+	"id": "tt_conv_only",
+	"training": {
+		"epochs": 20,
+		"batch_size": 64,
+		"lr": 0.003
+    },
+    
+	"encoder": [
+        {
+            "type": "tt_conv",
+            "param": {  
+                "conv_size": [4,4], 
+                "inp_ch_modes": [1,1,1],
+                "out_ch_modes": [4,4,4],
+                "ranks": [8,8,8,1],
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 64}
+        },
+        {
+            "type": "leaky_relu",
+            "param": {"negative_slope": 0.2}
+        },
+        {
+            "type": "tt_conv",
+            "param": {  
+                "conv_size": [4,4], 
+                "inp_ch_modes": [4,4,4],
+                "out_ch_modes": [4,4,4],
+                "ranks": [8,8,8,1],
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 64}
+        },
+        {
+            "type": "leaky_relu",
+            "param": {"negative_slope": 0.2}
+        },
+        {
+            "type": "tt_conv",
+            "param": {  
+                "conv_size": [4,4], 
+                "inp_ch_modes": [4,4,4],
+                "out_ch_modes": [4,8,4],
+                "ranks": [8,8,8,1],
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 128}
+        },
+        {
+            "type": "leaky_relu",
+            "param": {"negative_slope": 0.2}
+        },
+        {
+            "type": "tt_conv",
+            "param": {  
+                "conv_size": [4,4], 
+                "inp_ch_modes": [4,8,4],
+                "out_ch_modes": [4,8,4],
+                "ranks": [8,8,8,1],
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 128}
+        },
+        {
+            "type": "leaky_relu",
+            "param": {"negative_slope": 0.2}
+        },
+        {
+            "type": "tt_conv",
+            "param": {  
+                "conv_size": [4,4], 
+                "inp_ch_modes": [4,8,4],
+                "out_ch_modes": [5,4,5],
+                "ranks": [8,8,8,1],
+                "stride": 1,
+                "padding": 0}
+        }
+    ],
+
+    "decoder": [
+        {
+            "type": "tt_deconv",
+            "param": {  
+                "conv_size": [4,4], 
+                "inp_ch_modes": [5,4,5],
+                "out_ch_modes": [4,8,4],
+                "ranks": [8,8,8,1],
+                "stride": 1,
+                "padding": 0}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 128}
+        },
+        {
+            "type": "relu",
+            "param": {}
+        },
+        {
+            "type": "tt_deconv",
+            "param": {  
+                "conv_size": [4,4], 
+                "inp_ch_modes": [4,8,4],
+                "out_ch_modes": [4,8,4],
+                "ranks": [8,8,8,1],
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 128}
+        },
+        {
+            "type": "relu",
+            "param": {}
+        },
+        {
+            "type": "tt_deconv",
+            "param": {  
+                "conv_size": [4,4], 
+                "inp_ch_modes": [4,8,4],
+                "out_ch_modes": [4,4,4],
+                "ranks": [8,8,8,1],
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 64}
+        },
+        {
+            "type": "relu",
+            "param": {}
+        },
+        {
+            "type": "tt_deconv",
+            "param": {  
+                "conv_size": [4,4], 
+                "inp_ch_modes": [4,4,4],
+                "out_ch_modes": [4,4,4],
+                "ranks": [8,8,8,1],
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 64}
+        },
+        {
+            "type": "relu",
+            "param": {}
+        },
+        {
+            "type": "tt_deconv",
+            "param": {  
+                "conv_size": [4,4], 
+                "inp_ch_modes": [4,4,4],
+                "out_ch_modes": [1,1,1],
+                "ranks": [8,8,8,1],
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "tanh",
+            "param": {}
+        }
+    ]
+}
