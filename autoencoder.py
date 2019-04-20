@@ -8,7 +8,7 @@ from torchvision.transforms import ToPILImage
 from tlayers.TTConv import TTConv
 from tlayers.TTDeconv import TTDeconv
 
-from utils.showresults import show_recons
+from utils.showresults import show_recons, show_loss
 import time
 
 MODEL_DIR = "./MNIST_AE_results/"
@@ -254,6 +254,7 @@ class Decoder(nn.Module):
                 ),
                 nn.Tanh()
             )
+
     def forward(self, inp):
         output = self.layers(inp)
         return output
@@ -277,10 +278,19 @@ class Autoencoder(nn.Module):
         output = self.decoder(output)
         return output
 
-    def fit(self, trainloader, lr, n_epochs, print_every=1):
+    def fit(
+            self,
+            trainloader,
+            lr,
+            n_epochs,
+            validloader=None,
+            print_every=1
+        ):
         print("Training autoencoder...")
         start_time = time.time()
         _optimizer = torch.optim.Adam(self.parameters(), lr=lr)
+        train_losses = []
+        valid_losses = []
         for epoch in range(n_epochs):
             self.train()
             train_loss = 0
@@ -294,15 +304,32 @@ class Autoencoder(nn.Module):
                 train_loss += loss.data.cpu().numpy() * inputs.shape[0]
 
             train_loss = train_loss / len(trainloader.dataset)
+            train_losses.append(train_loss)
+            
+            if validloader is not None:
+                self.eval()
+                valid_loss = 0
+                with torch.no_grad():
+                    for inputs, _ in validloader:
+                        inputs = inputs.to(self.device)
+                        recons = self.forward(inputs)
+                        loss = self.mse(recons, inputs)
+                        valid_loss += loss.data.cpu().numpy() * inputs.shape[0]
+                    valid_loss = valid_loss / len(validloader.dataset)
+                    valid_losses.append(valid_loss)
 
             if (epoch + 1) % print_every == 0:
                 epoch_time = self._get_time(start_time, time.time())
-                print('epoch: {} | Train loss: {:.3f} | time: {}'.format(
+                print('epoch: {} | Train loss: {:.3f} | Valid loss: {:.3f} | time: {}'.format(
                     epoch + 1,
                     train_loss,
+                    valid_loss,
                     epoch_time)
                 )
+
                 self.plot_reconstruction(trainloader, epoch + 1)
+        if validloader is not None:
+            show_loss(valid_losses)
 
         print("Saving model...")
         self.save(MODEL_DIR)

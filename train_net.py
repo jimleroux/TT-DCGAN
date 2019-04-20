@@ -39,7 +39,7 @@ def train(args):
         os.mkdir(PATH+'/Fixed_results')
 
     print("### Loading data ###")
-    train_loader = load_dataset(data, batch_size)
+    train_loader = load_dataset(data, batch_size, is_train=True)
     print("### Loaded data ###")
 
     print("### Create models ###")
