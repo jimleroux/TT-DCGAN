@@ -78,6 +78,7 @@ class TTConv(torch.nn.Module):
         
         #tmp = tf.reshape(tmp, [-1, inp_h, inp_w, 1]) 
         #tmp = torch.reshape(tmp, (-1, inp_h, inp_w, 1)) # why not using inp_h and inp_w as first and second entry?
+
         tmp = torch.reshape(tmp, (-1, 1, inp_h, inp_w)) # we want h and w at last entry
         
         #tmp = tf.nn.conv2d(tmp, filters, [1] + strides + [1], padding)  
@@ -98,7 +99,7 @@ class TTConv(torch.nn.Module):
         #tmp = tf.reshape(tmp, [-1, inp_ch, h, w, ranks[0]])
         tmp = torch.reshape(tmp, (-1, inp_ch, h, w, self.ranks[0]))
         
-        #tmp = tf.transpose(tmp, [4, 1, 0, 2, 3])        
+        #tmp = tf.transpose(tmp, [4, 1, 0, 2, 3])      
         tmp = torch.transpose(tmp, 4, 0) #[4,1,2,3,0]
         tmp = torch.transpose(tmp, 4, 3) #[4,1,2,0,3]
         tmp = torch.transpose(tmp, 2, 3) #[4,1,0,2,3]

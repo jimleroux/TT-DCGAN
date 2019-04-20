@@ -2,16 +2,17 @@ import argparse
 import copy
 import os
 
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import datasets, transforms
 
+from dataloader import load_dataset
 from discriminator import Discriminator
 from generator import Generator
 from utils.saver import save_gif, save_models
 from utils.showresults import show_result, show_train_hist
-from dataloader import load_dataset
 
 MODEL_DIR = "./MNIST_AE_results/"
 
@@ -26,7 +27,8 @@ def train(args):
     filter_cst = args.filtercst
     device = args.device
     save_every = args.save_every
-    data = args.data  
+    data = args.data
+    is_tensorized = args.tensorized 
 
     # Create directory for results
     if not os.path.isdir(PATH):
@@ -43,6 +45,11 @@ def train(args):
     print("### Create models ###")
     D = Discriminator(filter_cst, latent_dim, TT=is_tensorized).to(device)
     G = Generator(filter_cst, latent_dim, TT=is_tensorized).to(device)
+    model_parameters = filter(lambda p: p.requires_grad, D.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    model_parameters = filter(lambda p: p.requires_grad, G.parameters())
+    params += sum([np.prod(p.size()) for p in model_parameters])
+    print("The model has:{} parameters".format(params))
     if pre_trained:
         D.encoder.load(MODEL_DIR)
         G.decoder.load(MODEL_DIR)
@@ -81,7 +88,6 @@ def train(args):
                 BCE_loss,
                 device
             )
-
             G_loss = G.train_step(
                 D,
                 batch_size,
@@ -89,17 +95,16 @@ def train(args):
                 BCE_loss,
                 device
             )
-
-            G_fix_loss = G.evaluate(
-                D_test,
-                batch_size,
-                BCE_loss,
-                device
-            )
+            # G_fix_loss = G.evaluate(
+            #     D_test,
+            #     batch_size,
+            #     BCE_loss,
+            #     device
+            # )
 
             D_losses.append(D_loss)
             G_losses.append(G_loss)
-            G_fix_losses.append(G_fix_loss)
+            # G_fix_losses.append(G_fix_loss)
         
         meanDloss = torch.mean(torch.FloatTensor(D_losses))
         meanGloss = torch.mean(torch.FloatTensor(G_losses))

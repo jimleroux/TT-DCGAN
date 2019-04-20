@@ -49,5 +49,5 @@ class Generator(nn.Module):
             G_result = self(z)
             D_result = discriminator(G_result).view((-1))
             G_train_loss = criterion(D_result, y)
-
+        self.train()
         return G_train_loss            

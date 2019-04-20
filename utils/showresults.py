@@ -15,6 +15,7 @@ def show_recons(images, num_epoch, num_samp, path):
         for i in range(num_samp):
             ax[i, j].cla() 
             im = np.transpose(test_images[i].squeeze(0).cpu().data.numpy(), (1,2,0))
+            im = torch.from_numpy(im).squeeze().data.numpy()
             ax[i, j].imshow(im/2+0.5)
 
     plt.savefig(path)  
@@ -47,9 +48,9 @@ def show_result(
         i = k // 5
         j = k % 5
         ax[i, j].cla() 
-        im = np.transpose(test_images[k, :].cpu().data.numpy(), (1,2,0))
-        ax[i, j].imshow(im/2+0.5)
-
+        im = np.transpose(test_images[k,:].cpu().data.view(-1,64,64).numpy(), (1,2,0))
+        im = torch.from_numpy(im).squeeze().data.numpy()
+        ax[i, j].imshow(im/2+0.5, cmap="gray")
     label = 'Epoch {0}'.format(num_epoch)
     fig.text(0.5, 0.04, label, ha='center')
     print ("Saved to :",path)

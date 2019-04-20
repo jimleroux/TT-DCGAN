@@ -21,10 +21,18 @@ def train(args):
     transform = transforms.Compose([
             transforms.Resize(img_size),
             transforms.ToTensor(),
-            transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+            transforms.Normalize(mean=(0.5,), std=(0.5,))
     ])
     print("### Loading data ###")
+<<<<<<< HEAD
     train_loader = load_dataset(data)
+=======
+    train_loader = torch.utils.data.DataLoader(
+        datasets.MNIST('data', train=True, download=True, transform=transform),
+        batch_size=batch_size,
+        shuffle=True
+    )
+>>>>>>> dcab58a436e39d3ea3a34208447d54caf48800e7
     print("### Loaded data ###")
 
     model = Autoencoder(

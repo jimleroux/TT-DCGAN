@@ -1,8 +1,10 @@
+import numpy as np
 import torch
 import torch.nn as nn
 
-from utils.initialization import normal_init
 from autoencoder import Encoder
+from tlayers.TTLin import TTLin
+from utils.initialization import normal_init
 
 MODEL_DIR = "./MNIST_AE_results/"
 
@@ -11,14 +13,22 @@ class Discriminator(nn.Module):
     def __init__(self, d=128, latentdim=100, TT=False):
         super(Discriminator, self).__init__()
         self.latentdim = latentdim
+        self.TT = TT
         self.encoder = Encoder(d=d, latentdim=latentdim, TT=TT)
-        self.linear = nn.Linear(latentdim, 1)
+        if self.TT:
+            self.linear = TTLin(
+                inp_modes=np.array([5,4,5]),
+                out_modes=np.array([1,1,1]),
+                mat_ranks=np.array([1,8,8,1])
+            )
+        else:
+            self.linear = nn.Linear(latentdim, 1)
         self.sigmoid = nn.Sigmoid()
 
     # forward method
     def forward(self, inp):
         # input = input.view(-1,28,28)
-        # print (input.shape)
+        # print (input.shape)s
         x = self.encoder(inp)
         x = x.view(-1, self.latentdim)
         x = self.linear(x)
