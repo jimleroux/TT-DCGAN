@@ -3,7 +3,7 @@ import torch.nn as nn
 from modules.tlayers.TTConv import TTConv
 from modules.tlayers.TTDeconv import TTDeconv
 
-MODEL_DIR = "../models/AE/"
+MODEL_DIR = "./models/AE/"
 
 class Encoder(nn.Module):
     def __init__(self, config):

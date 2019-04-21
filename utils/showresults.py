@@ -19,6 +19,7 @@ def show_recons(images, num_epoch, num_samp, path):
             ax[i, j].imshow(im/2+0.5)
 
     plt.savefig(path)
+    plt.close()
 
 def show_result(
         G,
@@ -26,7 +27,6 @@ def show_result(
         fixed_z_,
         z_,
         num_epoch,
-        device,
         show=False,
         save=False,
         path='result.png',
