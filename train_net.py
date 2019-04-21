@@ -30,12 +30,16 @@ def train(args):
     config = json.load(open(CONFIG_DIR + args.config, 'r'))
     TT = args.fc_tensorized
 
+    print(TT)
 
     # Create directory for results
     if not os.path.isdir(PATH):
         os.mkdir(PATH)
     # Create directory for specific run
-    PATH = PATH + "/{}".format(config["id"])
+    if TT:
+        PATH = PATH + "/{}_ttfc".format(config["id"])
+    else:
+        PATH = PATH + "/{}_ttfc".format(config["id"])
     if not os.path.isdir(PATH):
         os.mkdir(PATH)
     if not os.path.isdir(PATH + '/Random_results'):
@@ -100,16 +104,16 @@ def train(args):
                 BCE_loss,
                 device
             )
-            # G_fix_loss = G.evaluate(
-            #     D_test,
-            #     batch_size,
-            #     BCE_loss,
-            #     device
-            # )
+            G_fix_loss = G.evaluate(
+                D_test,
+                batch_size,
+                BCE_loss,
+                device
+            )
 
             D_losses.append(D_loss)
             G_losses.append(G_loss)
-            # G_fix_losses.append(G_fix_loss)
+            G_fix_losses.append(G_fix_loss)
         
         meanDloss = torch.mean(torch.FloatTensor(D_losses))
         meanGloss = torch.mean(torch.FloatTensor(G_losses))
@@ -190,7 +194,7 @@ def main():
     parser.add_argument(
         "--epochs",
         type=int,
-        default=100,
+        default=20,
         help="Number of epoch for the training"
     )
     parser.add_argument(
