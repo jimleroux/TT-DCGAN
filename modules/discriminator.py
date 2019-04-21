@@ -13,25 +13,29 @@ class Discriminator(nn.Module):
         self.encoder = Encoder(config)
         self.TT = TT
         if self.TT:
-            self.linear = TTLin(
-                inp_modes=np.array([5,4,5]),
-                out_modes=np.array([5,4,5]),
-                mat_ranks=np.array([1,8,8,1])
-            )
-            self.linear = TTLin(
-                inp_modes=np.array([5,4,5]),
-                out_modes=np.array([5,2,5]),
-                mat_ranks=np.array([1,8,8,1])
-            )
-            self.linear = TTLin(
-                inp_modes=np.array([5,2,5]),
-                out_modes=np.array([1,1,1]),
-                mat_ranks=np.array([1,8,8,1])
+            self.linear = nn.Sequential(
+                TTLin(
+                    inp_modes=np.array([5,4,5]),
+                    out_modes=np.array([5,4,5]),
+                    mat_ranks=np.array([1,8,8,1])
+                ),
+                TTLin(
+                    inp_modes=np.array([5,4,5]),
+                    out_modes=np.array([5,2,5]),
+                    mat_ranks=np.array([1,8,8,1])
+                ),
+                TTLin(
+                    inp_modes=np.array([5,2,5]),
+                    out_modes=np.array([1,1,1]),
+                    mat_ranks=np.array([1,8,8,1])
+                ),
             )
         else:
-            self.linear = nn.Linear(100, 100)
-            self.linear = nn.Linear(100, 50)
-            self.linear = nn.Linear(50, 1)
+            self.linear = nn.Sequential(
+                nn.Linear(100, 100),
+                nn.Linear(100, 50),
+                nn.Linear(50, 1)
+            )
         self.sigmoid = nn.Sigmoid()
 
     # forward method
