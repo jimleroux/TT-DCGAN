@@ -57,7 +57,7 @@ if __name__ == "__main__":
                         default="MNIST/all_TT.json",
                         help="Path to config file, all_TT.json as default.")
     parser.add_argument('--lr',
-                        type=int,
+                        type=float,
                         default=None)
     parser.add_argument('--epochs',
                         type=int,

@@ -15,11 +15,23 @@ class Discriminator(nn.Module):
         if self.TT:
             self.linear = TTLin(
                 inp_modes=np.array([5,4,5]),
+                out_modes=np.array([5,4,5]),
+                mat_ranks=np.array([1,8,8,1])
+            )
+            self.linear = TTLin(
+                inp_modes=np.array([5,4,5]),
+                out_modes=np.array([5,2,5]),
+                mat_ranks=np.array([1,8,8,1])
+            )
+            self.linear = TTLin(
+                inp_modes=np.array([5,2,5]),
                 out_modes=np.array([1,1,1]),
                 mat_ranks=np.array([1,8,8,1])
             )
         else:
-            self.linear = nn.Linear(100, 1)
+            self.linear = nn.Linear(100, 100)
+            self.linear = nn.Linear(100, 50)
+            self.linear = nn.Linear(50, 1)
         self.sigmoid = nn.Sigmoid()
 
     # forward method
