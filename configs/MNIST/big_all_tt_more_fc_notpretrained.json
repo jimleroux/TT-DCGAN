@@ -1,6 +1,6 @@
 {
 	"type": "ae",
-	"id": "full_tt",
+	"id": "big_all_tt_more_fc_notpretrained",
 	"training": {
 		"epochs": 20,
 		"batch_size": 64,
@@ -9,48 +9,11 @@
     
 	"encoder": [
         {
-            "type": "tt_conv",
-            "param": {  
-                "conv_size": [4,4], 
-                "inp_ch_modes": [1,1,1],
-                "out_ch_modes": [4,4,4],
-                "ranks": [4,4,4,1],
-                "stride": 2,
-                "padding": 1}
-        },
-        {
-            "type": "batchnorm",
-            "param": {"num_features": 64}
-        },
-        {
-            "type": "leaky_relu",
-            "param": {"negative_slope": 0.2}
-        },
-        {
-            "type": "tt_conv",
-            "param": {  
-                "conv_size": [4,4], 
-                "inp_ch_modes": [4,4,4],
-                "out_ch_modes": [4,4,4],
-                "ranks": [4,4,4,1],
-                "stride": 2,
-                "padding": 1}
-        },
-        {
-            "type": "batchnorm",
-            "param": {"num_features": 64}
-        },
-        {
-            "type": "leaky_relu",
-            "param": {"negative_slope": 0.2}
-        },
-        {
-            "type": "tt_conv",
-            "param": {  
-                "conv_size": [4,4], 
-                "inp_ch_modes": [4,4,4],
-                "out_ch_modes": [4,4,4],
-                "ranks": [4,4,4,1],
+            "type": "conv",
+            "param": {
+                "in_channels": 1,
+                "out_channels": 64,
+                "kernel_size": 4,
                 "stride": 2,
                 "padding": 1}
         },
@@ -68,7 +31,7 @@
                 "conv_size": [4,4], 
                 "inp_ch_modes": [4,4,4],
                 "out_ch_modes": [4,8,4],
-                "ranks": [4,4,4,1],
+                "ranks": [8,8,8,1],
                 "stride": 2,
                 "padding": 1}
         },
@@ -85,8 +48,44 @@
             "param": {  
                 "conv_size": [4,4], 
                 "inp_ch_modes": [4,8,4],
+                "out_ch_modes": [4,8,8],
+                "ranks": [8,8,8,1],
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 256}
+        },
+        {
+            "type": "leaky_relu",
+            "param": {"negative_slope": 0.2}
+        },
+        {
+            "type": "tt_conv",
+            "param": {  
+                "conv_size": [4,4], 
+                "inp_ch_modes": [4,8,8],
+                "out_ch_modes": [8,8,8],
+                "ranks": [8,8,8,1],
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 512}
+        },
+        {
+            "type": "leaky_relu",
+            "param": {"negative_slope": 0.2}
+        },
+        {
+            "type": "tt_conv",
+            "param": {  
+                "conv_size": [4,4], 
+                "inp_ch_modes": [8,8,8],
                 "out_ch_modes": [5,4,5],
-                "ranks": [4,4,4,1],
+                "ranks": [8,8,8,1],
                 "stride": 1,
                 "padding": 0}
         }
@@ -98,82 +97,82 @@
             "param": {  
                 "conv_size": [4,4], 
                 "inp_ch_modes": [5,4,5],
-                "out_ch_modes": [4,8,4],
-                "ranks": [4,4,4,1],
+                "out_ch_modes": [8,8,8],
+                "ranks": [8,8,8,1],
                 "stride": 1,
                 "padding": 0}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 512}
+        },
+        {
+            "type": "relu",
+            "param": {}
+        },
+        {
+            "type": "tt_deconv",
+            "param": {  
+                "conv_size": [4,4], 
+                "inp_ch_modes": [8,8,8],
+                "out_ch_modes": [4,8,8],
+                "ranks": [8,8,8,1],
+                "stride": 2,
+                "padding": 1}
+        },
+        {
+            "type": "batchnorm",
+            "param": {"num_features": 256}
+        },
+        {
+            "type": "relu",
+            "param": {}
+        },
+        {
+            "type": "tt_deconv",
+            "param": {  
+                "conv_size": [4,4], 
+                "inp_ch_modes": [4,8,8],
+                "out_ch_modes": [4,8,4],
+                "ranks": [8,8,8,1],
+                "stride": 2,
+                "padding": 1}
         },
         {
             "type": "batchnorm",
             "param": {"num_features": 128}
         },
         {
-            "type": "leaky_relu",
-            "param": {"negative_slope": 0.2}
+            "type": "relu",
+            "param": {}
         },
         {
-            "type": "tt_deconv",
-            "param": {  
-                "conv_size": [4,4], 
-                "inp_ch_modes": [4,8,4],
-                "out_ch_modes": [4,4,4],
-                "ranks": [4,4,4,1],
+            "type": "deconv",
+            "param": {
+                "in_channels": 128,
+                "out_channels": 64,
+                "kernel_size": 4,
                 "stride": 2,
-                "padding": 1}
+                "padding": 1,
+                "bias": false}
         },
         {
             "type": "batchnorm",
             "param": {"num_features": 64}
         },
         {
-            "type": "leaky_relu",
-            "param": {"negative_slope": 0.2}
+            "type": "relu",
+            "param": {}
         },
         {
-            "type": "tt_deconv",
-            "param": {  
-                "conv_size": [4,4], 
-                "inp_ch_modes": [4,4,4],
-                "out_ch_modes": [4,4,4],
-                "ranks": [4,4,4,1],
+            "type": "deconv",
+            "param": {
+                "in_channels": 64,
+                "out_channels": 1,
+                "kernel_size": 4,
                 "stride": 2,
-                "padding": 1}
-        },
-        {
-            "type": "batchnorm",
-            "param": {"num_features": 64}
-        },
-        {
-            "type": "leaky_relu",
-            "param": {"negative_slope": 0.2}
-        },
-        {
-            "type": "tt_deconv",
-            "param": {  
-                "conv_size": [4,4], 
-                "inp_ch_modes": [4,4,4],
-                "out_ch_modes": [4,4,4],
-                "ranks": [4,4,4,1],
-                "stride": 2,
-                "padding": 1}
-        },
-        {
-            "type": "batchnorm",
-            "param": {"num_features": 64}
-        },
-        {
-            "type": "leaky_relu",
-            "param": {"negative_slope": 0.2}
-        },
-        {
-            "type": "tt_deconv",
-            "param": {  
-                "conv_size": [4,4], 
-                "inp_ch_modes": [4,4,4],
-                "out_ch_modes": [1,1,1],
-                "ranks": [4,4,4,1],
-                "stride": 2,
-                "padding": 1}
+                "padding": 1,
+                "bias": false}
         },
         {
             "type": "tanh",
