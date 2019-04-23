@@ -23,7 +23,6 @@ def show_recons(images, num_epoch, num_samp, path):
 
 def show_result(
         G,
-        latent_dim,
         fixed_z_,
         z_,
         num_epoch,

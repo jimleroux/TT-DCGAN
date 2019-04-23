@@ -135,7 +135,6 @@ def train(args):
         z_ = torch.randn((5*5, 100)).to(device)
         show_result(
             G,
-            100,
             fixed_z_,
             z_,
             (epoch+1),
@@ -145,7 +144,6 @@ def train(args):
         )
         show_result(
             G,
-            100,
             fixed_z_,
             z_,
             (epoch+1),
