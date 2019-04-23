@@ -39,7 +39,7 @@ def train(args):
     if TT:
         PATH = PATH + "/{}_ttfc".format(config["id"])
     else:
-        PATH = PATH + "/{}_ttfc".format(config["id"])
+        PATH = PATH + "/{}".format(config["id"])
     if not os.path.isdir(PATH):
         os.mkdir(PATH)
     if not os.path.isdir(PATH + '/Random_results'):

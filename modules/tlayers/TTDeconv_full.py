@@ -1,15 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Apr 14 16:53:07 2019
-
-@author: tob10
-"""
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class TTConv_full(torch.nn.Module):
+class TTDeconv_full(torch.nn.Module):
     def __init__(self, 
                  conv_size,
                  inp_ch_modes,              
@@ -34,7 +28,7 @@ class TTConv_full(torch.nn.Module):
         In the constructor we instantiate two nn.Linear modules and assign them as
         member variables.
         """
-        super(TTConv_full   , self).__init__()
+        super(TTDeconv_full, self).__init__()
         self.conv_size = conv_size
         self.inp_ch_modes=inp_ch_modes
         self.out_ch_modes=out_ch_modes
@@ -50,7 +44,8 @@ class TTConv_full(torch.nn.Module):
         for i in range(self.d):
             # initialise each core with once again glorot initialisation with parameter matching the output and input channel mode (the c_i/s_i multiply to C/S)
             self.cores.append(nn.Parameter(torch.nn.init.xavier_uniform_(torch.empty(out_ch_modes[i] * ranks[i + 1], ranks[i] * inp_ch_modes[i]))))
-  
+            
+
 
     def forward(self, inp):
         
@@ -98,12 +93,11 @@ class TTConv_full(torch.nn.Module):
         
         #full = tf.reshape(full, [window[0], window[1], inp_ch, out_ch])
         #full = torch.reshape(full, (self.conv_size[0], self.conv_size[1], inp_ch, out_ch))
-        full = torch.reshape(full, (out_ch, inp_ch, self.conv_size[0], self.conv_size[1]))
-        #full = torch.reshape(full, (inp_ch, out_ch, self.conv_size[0], self.conv_size[1]))
+        #full = torch.reshape(full, (out_ch, inp_ch, self.conv_size[0], self.conv_size[1]))
+        full = torch.reshape(full, (inp_ch, out_ch, self.conv_size[0], self.conv_size[1]))
         
         
-        tmp = F.conv2d(tmp, full,bias=None, stride=self.stride, padding=self.padding)
+        tmp = F.conv_transpose2d(tmp, full,bias=None, stride=self.stride, padding=self.padding)
         
 
         return tmp
-    
