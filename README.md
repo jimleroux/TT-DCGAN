@@ -8,13 +8,13 @@ git clone https://github.com/jimleroux/tensor_factorization.git
 To train the GAN, start by pretraining the weights with an autoencoder use:    
 
 ```bash
-python train_ae.py --add_the_config_file_you_want.json
+python train_ae.py --config add_the_config_file_you_want.json
 ```  
 
 After you can train the GAN model with:
 
 ```bash
-python train_net.py --add_the_config_file_you_want.json
+python train_net.py --config add_the_config_file_you_want.json
 ```
 
 You can monitor the training by looking at the images in `MNIST_DCGAN_results` folder which will be created during training.
