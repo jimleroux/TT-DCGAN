@@ -104,16 +104,16 @@ def train(args):
                 BCE_loss,
                 device
             )
-            G_fix_loss = G.evaluate(
-                D_test,
-                batch_size,
-                BCE_loss,
-                device
-            )
+            # G_fix_loss = G.evaluate(
+            #     D_test,
+            #     batch_size,
+            #     BCE_loss,
+            #     device
+            # )
 
             D_losses.append(D_loss)
             G_losses.append(G_loss)
-            G_fix_losses.append(G_fix_loss)
+            # G_fix_losses.append(G_fix_loss)
         
         meanDloss = torch.mean(torch.FloatTensor(D_losses))
         meanGloss = torch.mean(torch.FloatTensor(G_losses))

@@ -17,17 +17,17 @@ class Discriminator(nn.Module):
                 TTLin(
                     inp_modes=np.array([5,4,5]),
                     out_modes=np.array([5,4,5]),
-                    mat_ranks=np.array([1,8,8,1])
+                    mat_ranks=np.array([1,20,20,1])
                 ),
                 TTLin(
                     inp_modes=np.array([5,4,5]),
                     out_modes=np.array([5,2,5]),
-                    mat_ranks=np.array([1,8,8,1])
+                    mat_ranks=np.array([1,20,20,1])
                 ),
                 TTLin(
                     inp_modes=np.array([5,2,5]),
                     out_modes=np.array([1,1,1]),
-                    mat_ranks=np.array([1,8,8,1])
+                    mat_ranks=np.array([1,20,20,1])
                 ),
             )
         else:

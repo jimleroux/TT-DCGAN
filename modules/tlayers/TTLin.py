@@ -16,7 +16,9 @@ class TTLin(torch.nn.Module):
                  inp_modes,              
                  out_modes,
                  mat_ranks):
-        """ tt-conv-layer (convolution of full input tensor with tt-filters (make tt full then use conv2d))
+        """
+        tt-conv-layer (convolution of full input tensor with tt-filters
+        (make tt full then use conv2d))
         Args:
         inp: input tensor, float - [batch_size, H, W, C]
         conv_size: convolution window size, list [wH, wW]
@@ -35,43 +37,35 @@ class TTLin(torch.nn.Module):
         member variables.
         """
         super(TTLin, self).__init__()
-        
         self.inp_modes=inp_modes
         self.out_modes=out_modes
         self.mat_ranks=mat_ranks
-        
         # filter initialiased with glorot initialisation with the right parameter
         self.d = inp_modes.size
         
         self.mat_cores = nn.ParameterList()
         for i in range(self.d):
-            # initialise each core with once again glorot initialisation with parameter matching the output and input channel mode (the c_i/s_i multiply to C/S)
-            self.mat_cores.append(nn.Parameter(torch.nn.init.xavier_uniform_(torch.empty(out_modes[i] * mat_ranks[i + 1], mat_ranks[i] * inp_modes[i]))))
-        
-        
-        
+            empty_core = torch.empty(
+                out_modes[i] * mat_ranks[i + 1], mat_ranks[i] * inp_modes[i]
+            )
+            empty_core = nn.Parameter(
+                torch.nn.init.xavier_uniform_(empty_core)
+            )
+            # initialise each core with once again glorot initialisation with
+            # parameter matching the output and input channel mode
+            # (the c_i/s_i multiply to C/S)
+            self.mat_cores.append(empty_core)
+
     def forward(self, inp):
-        
         # should we use clone to keep self.cores untouched? 
         mat_cores = self.mat_cores
-        
-        #out = tf.reshape(inp, [-1, np.prod(inp_modes)])
         out = torch.reshape(inp, (-1, np.prod(self.inp_modes)))
-        #out = tf.transpose(out, [1, 0])
         out = torch.transpose(out, 1, 0)
-        
         for i in range(self.d):
-            #out = tf.reshape(out, [mat_ranks[i] * inp_modes[i], -1])
             out = torch.reshape(out, (self.mat_ranks[i] * self.inp_modes[i], -1))
-                         
-            #out = tf.matmul(mat_cores[i], out)
             out = torch.mm(mat_cores[i], out)
-            #out = tf.reshape(out, [out_modes[i], -1])
             out = torch.reshape(out, (self.out_modes[i], -1))
-            #out = tf.transpose(out, [1, 0])
             out = torch.transpose(out, 1, 0)
-        
-        
-        #out = tf.reshape(out, [-1, np.prod(out_modes)], name="out")
         out = torch.reshape(out, (-1, np.prod(self.out_modes)))
+        
         return out

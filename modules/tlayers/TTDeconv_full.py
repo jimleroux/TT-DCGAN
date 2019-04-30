@@ -11,7 +11,9 @@ class TTDeconv_full(torch.nn.Module):
                  ranks,
                  stride=1,
                  padding=0):
-        """ tt-conv-layer (convolution of full input tensor with tt-filters (make tt full then use conv2d))
+        """
+        tt-conv-layer (convolution of full input tensor with tt-filters
+        (make tt full then use conv2d))
         Args:
         inp: input tensor, float - [batch_size, H, W, C]
         conv_size: convolution window size, list [wH, wW]
@@ -37,41 +39,39 @@ class TTDeconv_full(torch.nn.Module):
         self.padding=padding
         
         # filter initialiased with glorot initialisation with the right parameter
-        self.filters = nn.Parameter(torch.nn.init.xavier_uniform_(torch.empty(conv_size[0], conv_size[1], 1, ranks[0])))
+        self.filters = nn.Parameter(
+            torch.nn.init.xavier_uniform_(
+                torch.empty(conv_size[0], conv_size[1], 1, ranks[0])
+            )
+        )
         self.d = len(inp_ch_modes)
         
         self.cores = nn.ParameterList()
         for i in range(self.d):
-            # initialise each core with once again glorot initialisation with parameter matching the output and input channel mode (the c_i/s_i multiply to C/S)
-            self.cores.append(nn.Parameter(torch.nn.init.xavier_uniform_(torch.empty(out_ch_modes[i] * ranks[i + 1], ranks[i] * inp_ch_modes[i]))))
+            # initialise each core with once again glorot initialisation with
+            # parameter matching the output and input channel mode
+            # (the c_i/s_i multiply to C/S)
+            empty_core = torch.empty(
+                out_ch_modes[i] * ranks[i + 1], ranks[i] * inp_ch_modes[i]
+            )
+            empty_core = nn.Parameter(
+                torch.nn.init.xavier_uniform_(empty_core)
+            )
+            self.cores.append(empty_core)
             
-
-
     def forward(self, inp):
-        
         # should we use clone to keep self.cores untouched? 
         cores = self.cores
         full = self.filters
-        
         #inp_shape = inp.get_shape().as_list()[1:] + one other line
         inp_ch, inp_h, inp_w = list(inp.shape)[1:4] #shape 0 is batchsize
-        #tmp = tf.reshape(inp, [-1, inp_h, inp_w, inp_ch])
         tmp = torch.reshape(inp, (-1, inp_ch, inp_h, inp_w))
         
-        
         for i in range(self.d):            
-            #full = tf.reshape(full, [-1, ranks[i]])
             full = torch.reshape(full, (-1, self.ranks[i]))
-            
-            #core = tf.transpose(cores[i], [1, 0])
             core = torch.transpose(cores[i], 1, 0)
-            
-            #core = tf.reshape(core, [ranks[i], -1])
             core = torch.reshape(core, (self.ranks[i], -1))
-            
-            #full = tf.matmul(full, core)
-            full = torch.mm(full, core)
-            
+            full = torch.mm(full, core)  
         out_ch = np.prod(self.out_ch_modes)
         
         fshape = [self.conv_size[0], self.conv_size[1]]
@@ -83,21 +83,11 @@ class TTDeconv_full(torch.nn.Module):
             inord.append(2 + 2 * i)
             fshape.append(self.out_ch_modes[i])
             outord.append(2 + 2 * i + 1)
+        
         order += inord + outord
-        
-        #full = tf.reshape(full, fshape)
         full = torch.reshape(full, tuple(fshape))
-        
-        #full = tf.transpose(full, order)
         full = full.permute(tuple(order))
-        
-        #full = tf.reshape(full, [window[0], window[1], inp_ch, out_ch])
-        #full = torch.reshape(full, (self.conv_size[0], self.conv_size[1], inp_ch, out_ch))
-        #full = torch.reshape(full, (out_ch, inp_ch, self.conv_size[0], self.conv_size[1]))
         full = torch.reshape(full, (inp_ch, out_ch, self.conv_size[0], self.conv_size[1]))
-        
-        
         tmp = F.conv_transpose2d(tmp, full,bias=None, stride=self.stride, padding=self.padding)
         
-
         return tmp
