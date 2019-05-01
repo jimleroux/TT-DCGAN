@@ -1,12 +1,14 @@
 import argparse
+import json
+import sys
 
 import numpy as np
-import json
 
+sys.path.append("../")
 from modules.discriminator import Discriminator
 from modules.generator import Generator
 
-CONFIG_DIR = "./configs/"
+CONFIG_DIR = "../configs/"
 
 def num_param(args):
     TT = args.fc_tensorized
