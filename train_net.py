@@ -30,13 +30,22 @@ def train(args):
     config = json.load(open(CONFIG_DIR + args.config, 'r'))
     TT = args.fc_tensorized
 
+    print(TT)
+
     # Create directory for results
     if not os.path.isdir(PATH):
         os.mkdir(PATH)
-    if not os.path.isdir(PATH+'/Random_results'):
-        os.mkdir(PATH+'/Random_results')
-    if not os.path.isdir(PATH+'/Fixed_results'):
-        os.mkdir(PATH+'/Fixed_results')
+    # Create directory for specific run
+    if TT:
+        PATH = PATH + "/{}_ttfc".format(config["id"])
+    else:
+        PATH = PATH + "/{}".format(config["id"])
+    if not os.path.isdir(PATH):
+        os.mkdir(PATH)
+    if not os.path.isdir(PATH + '/Random_results'):
+        os.mkdir(PATH + '/Random_results')
+    if not os.path.isdir(PATH + '/Fixed_results'):
+        os.mkdir(PATH + '/Fixed_results')
 
     print("### Loading data ###")
     train_loader = load_dataset(data, batch_size, is_train=True)
@@ -129,7 +138,6 @@ def train(args):
             100,
             fixed_z_,
             z_,
-            device,
             (epoch+1),
             save=True,
             path=p,
@@ -140,7 +148,6 @@ def train(args):
             100,
             fixed_z_,
             z_,
-            device,
             (epoch+1),
             save=True,
             path=fixed_p,
@@ -158,7 +165,7 @@ def train(args):
     show_train_hist(
         train_hist,
         save=True,
-        path=PATH+'/MNIST_DCGAN_train_hist.png'
+        path=PATH + '/MNIST_DCGAN_train_hist.png'
     )
     save_gif(PATH, epochs)
     
@@ -187,13 +194,13 @@ def main():
     parser.add_argument(
         "--epochs",
         type=int,
-        default=100,
+        default=20,
         help="Number of epoch for the training"
     )
     parser.add_argument(
         "--batch",
         type=int,
-        default=128,
+        default=64,
         help="Batch size"
     )
     parser.add_argument(
