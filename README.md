@@ -14,7 +14,7 @@ python train_ae.py --config add_the_config_file_you_want.json
 After you can train the GAN model with:
 
 ```bash
-python train_net.py --config add_the_config_file_you_want.json
+python train_net.py --config add_the_config_file_you_want.json --pre_trained
 ```
 
 You can monitor the training by looking at the images in `MNIST_DCGAN_results` folder which will be created during training. Here's an exemple of the samples generated with our fully tensorized (34 080 parameters) TT-DCGAN as the training goes.
