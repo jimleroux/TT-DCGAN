@@ -1,14 +1,15 @@
-import os
 import argparse
-
-import numpy as np
 import json
+import os
 import pickle
-import matplotlib.pyplot as plt
+import sys
 
-CONFIG_PATH = "./models/AE/config_"
-GAN_RESULTS_PATH = "./MNIST_DCGAN_results/"
-SAVE_PATH = "./results/"
+import matplotlib.pyplot as plt
+import numpy as np
+
+CONFIG_PATH = "../models/AE/config_"
+GAN_RESULTS_PATH = "../MNIST_DCGAN_results/"
+SAVE_PATH = "../results/"
 
 configs = ["not_TT", "full_tt", "all_TT", "tt_conv_only", "tt_deconv_only"]
 
