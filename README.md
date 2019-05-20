@@ -20,3 +20,5 @@ python train_net.py --config add_the_config_file_you_want.json --pre_trained --f
 You can monitor the training by looking at the images in `MNIST_DCGAN_results` folder which will be created during training. Here's an exemple of the generated samples with the fully tensorized (34 080 parameters) TT-DCGAN as the training goes.
 
 ![](MNIST_DCGAN_results/full_tt_ttfc/generation_animation.gif)
+
+Licensed under the [MIT license](LICENSE).
