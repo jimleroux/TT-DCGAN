@@ -9,16 +9,17 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class TTDeconv(torch.nn.Module):
     def __init__(
-            self, 
+            self,
             conv_size,
-            inp_ch_modes,              
+            inp_ch_modes,
             out_ch_modes,
             ranks,
             stride=1,
             padding=0
-        ):
+    ):
         """
         tt-conv-layer (convolution of full input tensor with tt-filters
         (make tt full then use conv2d))
@@ -27,9 +28,9 @@ class TTDeconv(torch.nn.Module):
         conv_size: convolution window size, list [wH, wW]
         inp_ch_modes: input channels modes, np.array (int32) of size d
         out_ch_modes: output channels modes, np.array (int32) of size d
-        ranks: tt-filters ranks, np.array (int32) of size (d + 1)        
-        strides: strides, list of 2 ints - [sx, sy] 
-        padding    
+        ranks: tt-filters ranks, np.array (int32) of size (d + 1)
+        strides: strides, list of 2 ints - [sx, sy]
+        padding
         trainable: trainable variables flag, bool
 
         Returns:
@@ -39,13 +40,13 @@ class TTDeconv(torch.nn.Module):
         member variables.
         """
         super(TTDeconv, self).__init__()
-        
-        self.inp_ch_modes=inp_ch_modes
-        self.out_ch_modes=out_ch_modes
-        self.ranks=ranks
-        self.stride=stride
-        self.padding=padding
-        
+
+        self.inp_ch_modes = inp_ch_modes
+        self.out_ch_modes = out_ch_modes
+        self.ranks = ranks
+        self.stride = stride
+        self.padding = padding
+
         # filter initialiased with glorot initialisation with the right
         # parameter
         self.filters = nn.Parameter(
@@ -54,7 +55,7 @@ class TTDeconv(torch.nn.Module):
             )
         )
         self.d = len(inp_ch_modes)
-        
+
         self.cores = nn.ParameterList()
         for i in range(self.d):
             # initialise each core with once again glorot initialisation with
@@ -71,10 +72,10 @@ class TTDeconv(torch.nn.Module):
     def forward(self, inp):
         # should we use clone to keep self.cores untouched? 
         cores = self.cores
-        #inp_shape = inp.get_shape().as_list()[1:] + one other line
-        inp_ch, inp_h, inp_w = list(inp.shape)[1:4] #shape 0 is batchsize, 1 is inp_ch...
+        # inp_shape = inp.get_shape().as_list()[1:] + one other line
+        inp_ch, inp_h, inp_w = list(inp.shape)[1:4]  # shape 0 is batchsize, 1 is inp_ch...
         tmp = torch.reshape(inp, (-1,  inp_ch, inp_h, inp_w))
-        tmp = torch.reshape(tmp, (-1, 1, inp_h, inp_w)) # we want h and w at last entry
+        tmp = torch.reshape(tmp, (-1, 1, inp_h, inp_w))  # we want h and w at last entry
         tmp = F.conv_transpose2d(
             tmp.contiguous(),
             self.filters,
@@ -82,23 +83,23 @@ class TTDeconv(torch.nn.Module):
             stride=self.stride,
             padding=self.padding
         )
-        #might need to look at the order of the stride
-        #tmp shape = [batch_size * inp_ch, r, h, w] 64*64*16*128*1024
+        # might need to look at the order of the stride
+        # tmp shape = [batch_size * inp_ch, r, h, w] 64*64*16*128*1024
         h, w = list(tmp.shape)[2:4]
-        #tmp = tf.reshape(tmp, [-1, inp_ch, h, w, ranks[0]])
-        tmp = torch.reshape(tmp, (-1, inp_ch, h, w, self.ranks[0]))      
-        tmp = torch.transpose(tmp, 4, 0) #[4,1,2,3,0]
-        tmp = torch.transpose(tmp, 4, 3) #[4,1,2,0,3]
-        tmp = torch.transpose(tmp, 2, 3) #[4,1,0,2,3]
-        #tmp shape = [r, c, b, h, w]
-        for i in range(self.d):            
+        # tmp = tf.reshape(tmp, [-1, inp_ch, h, w, ranks[0]])
+        tmp = torch.reshape(tmp, (-1, inp_ch, h, w, self.ranks[0])) 
+        tmp = torch.transpose(tmp, 4, 0)  # [4,1,2,3,0]
+        tmp = torch.transpose(tmp, 4, 3)  # [4,1,2,0,3]
+        tmp = torch.transpose(tmp, 2, 3)  # [4,1,0,2,3]
+        # tmp shape = [r, c, b, h, w]
+        for i in range(self.d):
             tmp = torch.reshape(tmp, (self.ranks[i] * self.inp_ch_modes[i], -1))
-            tmp = torch.mm(cores[i], tmp)                
+            tmp = torch.mm(cores[i], tmp)       
             tmp = torch.reshape(tmp, (self.out_ch_modes[i], -1))
             tmp = torch.transpose(tmp, 1, 0)
-    
+
         out_ch = np.prod(self.out_ch_modes)
         out = torch.reshape(tmp, (-1, out_ch, h, w))
-        #out shape is [batch_size, out_ch, h, w]
-        
+        # out shape is [batch_size, out_ch, h, w]
+
         return out

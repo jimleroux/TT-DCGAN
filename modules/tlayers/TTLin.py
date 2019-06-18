@@ -8,7 +8,6 @@ Created on Sun Apr 14 16:53:07 2019
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 class TTLin(torch.nn.Module):
@@ -37,9 +36,9 @@ class TTLin(torch.nn.Module):
         member variables.
         """
         super(TTLin, self).__init__()
-        self.inp_modes=inp_modes
-        self.out_modes=out_modes
-        self.mat_ranks=mat_ranks
+        self.inp_modes = inp_modes
+        self.out_modes = out_modes
+        self.mat_ranks = mat_ranks
         # filter initialiased with glorot initialisation with the right parameter
         self.d = inp_modes.size
         

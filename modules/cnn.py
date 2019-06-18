@@ -5,6 +5,7 @@ from modules.tlayers.TTDeconv_full import TTDeconv_full
 
 MODEL_DIR = "./models/AE/"
 
+
 class Encoder(nn.Module):
     def __init__(self, config):
         super(Encoder, self).__init__()
@@ -32,7 +33,7 @@ class Encoder(nn.Module):
                 encoder_network.append(nn.Linear(**layer['param']))
             else:
                 raise ValueError("Unsupported layer type supplied.")
-        return nn.Sequential(*encoder_network)        
+        return nn.Sequential(*encoder_network)
 
     def forward(self, inp):
         output = self.layers(inp)
@@ -71,7 +72,7 @@ class Decoder(nn.Module):
                 encoder_network.append(nn.Linear(**layer['param']))
             else:
                 raise ValueError("Unsupported layer type supplied.")
-        return nn.Sequential(*encoder_network)   
+        return nn.Sequential(*encoder_network)
 
     def forward(self, inp):
         output = self.layers(inp)

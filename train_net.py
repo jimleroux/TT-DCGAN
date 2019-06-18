@@ -7,7 +7,6 @@ import json
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torchvision import datasets, transforms
 
 from utils.dataloader import load_dataset
 from modules.discriminator import Discriminator
@@ -16,6 +15,7 @@ from utils.saver import save_gif, save_models
 from utils.showresults import show_result, show_train_hist
 
 CONFIG_DIR = "./configs/"
+
 
 def train(args):
     pre_trained = args.pre_trained
@@ -62,7 +62,7 @@ def train(args):
     if pre_trained:
         D.encoder.load()
         G.decoder.load()
-    
+
     G_optimizer = optim.Adam(
         G.parameters(),
         lr=lrG,
@@ -73,17 +73,17 @@ def train(args):
         lr=lrD,
         betas=(0.5, 0.999)
     )
-    
+
     train_hist = {
-        'D_losses':[],
-        'G_losses':[],
-        'G_fix_losses':[]
+        'D_losses': [],
+        'G_losses': [],
+        'G_fix_losses': []
     }
-    
+
     BCE_loss = nn.BCELoss()
     fixed_z_ = torch.randn((5 * 5, 100)).to(device)    # fixed noise
     for epoch in range(epochs):
-        if epoch == 1 or epoch%save_every == 0:
+        if epoch == 1 or epoch % save_every == 0:
             D_test = copy.deepcopy(D)
         D_losses = []
         G_losses = []
@@ -114,7 +114,7 @@ def train(args):
             D_losses.append(D_loss)
             G_losses.append(G_loss)
             # G_fix_losses.append(G_fix_loss)
-        
+
         meanDloss = torch.mean(torch.FloatTensor(D_losses))
         meanGloss = torch.mean(torch.FloatTensor(G_losses))
         meanGFloss = torch.mean(torch.FloatTensor(G_fix_losses))
@@ -168,8 +168,9 @@ def train(args):
         path=PATH + '/MNIST_DCGAN_train_hist.png'
     )
     save_gif(PATH, epochs)
-    
+
     return D, G
+
 
 def main():
     parser = argparse.ArgumentParser(description="TDCGAN")
@@ -238,8 +239,9 @@ def main():
         help="Specify to have the last FC in TT format."
     )
     args = parser.parse_args()
-    
+
     D, G = train(args)
+
 
 if __name__ == "__main__":
     main()

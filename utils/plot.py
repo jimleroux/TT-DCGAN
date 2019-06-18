@@ -2,10 +2,8 @@ import argparse
 import json
 import os
 import pickle
-import sys
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 CONFIG_PATH = "../models/AE/config_"
 GAN_RESULTS_PATH = "../MNIST_DCGAN_results/"
@@ -14,6 +12,7 @@ SAVE_PATH = "../results/"
 configs = ["not_TT", "full_tt", "all_TT", "tt_conv_only", "tt_deconv_only"]
 
 names = ["Base", "FTT", "ATT", "TTenc", "TTdec"]
+
 
 def plot_AE():
     plt.style.use('ggplot')
@@ -34,11 +33,13 @@ def plot_AE():
         os.mkdir(SAVE_PATH)
     plt.savefig(SAVE_PATH + "AEs_loss.png")
 
+
 hist = "/train_hist.pkl"
 
 exp = ["all_TT_ttfc", "not_TT_ttfc", "tt_conv_only_ttfc"]
 
 na = ["ATT-TTfc", "Baseline-TTfc", "TTenc-TTfc"]
+
 
 def plot_Gloss():
     plt.style.use('ggplot')
@@ -59,6 +60,7 @@ def plot_Gloss():
         os.mkdir(SAVE_PATH)
     plt.savefig(SAVE_PATH + "G_loss.png")
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="TDCGAN")
     parser.add_argument(
@@ -73,7 +75,7 @@ if __name__ == '__main__':
     )
     args = parser.parse_args()
 
-    if args.AE:    
+    if args.AE:
         plot_AE()
     if args.G:
         plot_Gloss()

@@ -2,15 +2,13 @@ import argparse
 
 import json
 import torch
-import torch.nn as nn
-import torch.optim as optim
-from torchvision import datasets, transforms
 
 from utils.dataloader import load_dataset
 from modules.autoencoder import Autoencoder
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 CONFIG_DIR = "./configs/"
+
 
 def train(args):
     config = json.load(open(CONFIG_DIR + args.config, 'r'))
@@ -26,7 +24,7 @@ def train(args):
     if args.batch:
         batch = args.batch
     if args.lr:
-        lr = args.lr    
+        lr = args.lr
 
     print("### Loading data ###")
     train_loader = load_dataset(data, batch, is_train=True)
@@ -42,6 +40,7 @@ def train(args):
     )
     model.to(DEVICE)
     model.fit(train_loader, lr, epochs, validloader=valid_loader)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -66,5 +65,4 @@ if __name__ == "__main__":
                         type=int,
                         default=None)
     args = parser.parse_args()
-    train(args)    
-
+    train(args)
