@@ -11,6 +11,7 @@ from utils.showresults import show_loss, show_recons
 
 MODEL_DIR = "./models/"
 
+
 class Autoencoder(nn.Module):
     def __init__(self, device, config):
         super(Autoencoder, self).__init__()
@@ -33,7 +34,7 @@ class Autoencoder(nn.Module):
             n_epochs,
             validloader=None,
             print_every=1
-        ):
+    ):
         print("Training autoencoder...")
         start_time = time.time()
         _optimizer = torch.optim.Adam(self.parameters(), lr=lr)
@@ -53,7 +54,7 @@ class Autoencoder(nn.Module):
 
             train_loss = train_loss / len(trainloader.dataset)
             train_losses.append(train_loss)
-            
+
             valid_loss = 0
             if validloader is not None:
                 self.eval()
@@ -99,7 +100,7 @@ class Autoencoder(nn.Module):
         torch.save(self.encoder.state_dict(), model_path+"encoder_param.pkl")
         torch.save(self.decoder.state_dict(), model_path+"decoder_param.pkl")
         with open(model_path + "output.json", "w") as f:
-            json.dump(losses, f)  
+            json.dump(losses, f)
 
     def _get_time(self, starting_time, current_time):
         total_time = current_time - starting_time

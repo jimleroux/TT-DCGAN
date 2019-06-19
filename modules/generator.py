@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 
-from utils.initialization import normal_init
 from modules.cnn import Decoder
+
 
 class Generator(nn.Module):
     # initializers
@@ -13,7 +13,7 @@ class Generator(nn.Module):
     # forward method
     def forward(self, inp):
         # x = F.relu(self.deconv1(input))
-        x = inp.view(-1,100,1,1)
+        x = inp.view(-1, 100, 1, 1)
         x = self.decoder(x)
         return x
 
@@ -47,4 +47,4 @@ class Generator(nn.Module):
             D_result = discriminator(G_result).view((-1))
             G_train_loss = criterion(D_result, y)
         self.train()
-        return G_train_loss            
+        return G_train_loss

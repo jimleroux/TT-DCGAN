@@ -1,5 +1,5 @@
 from PIL import Image
-import matplotlib.pyplot as plt
+
 
 def append_images(images, direction='horizontal', bg_color=(1, 1, 1), aligment='bottom'):
     """
